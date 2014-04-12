@@ -2,10 +2,20 @@
 
 namespace Cpliakas\DynamoDb\ODM;
 
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-
 interface DocumentManagerInterface
 {
+    /**
+     * Instantiates an entity class.
+     *
+     * @param string $entityClass
+     * @param mixed $data
+     *
+     * @return \Cpliakas\DynamoDb\ODM\EntityInterface
+     *
+     * @throws \DomainException
+     */
+    public function entityFactory($entityClass, $data = array());
+
     /**
      * Writes a new entry to DynamoDB containing the entity.
      *
@@ -58,65 +68,10 @@ interface DocumentManagerInterface
 
     /**
      * @param string $entityClass
-     * @param \Cpliakas\DynamoDb\ODM\Conditions $conditions
+     * @param \Cpliakas\DynamoDb\ODM\ConditionsInterface $conditions
      * @param array $options
      *
      * @return
      */
-    public function query($entityClass, Conditions $conditions, array $options = array());
-
-    /**
-     * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
-     *
-     * @return \Cpliakas\DynamoDb\ODM\DocumentManagerInterface
-     */
-    public function setDispatcher(EventDispatcherInterface $dispatcher);
-
-    /**
-     * @return \Symfony\Component\EventDispatcher\EventDispatcherInterface
-     */
-    public function getDispatcher();
-
-    /**
-     * @param bool $consistentRead
-     *
-     * @return \Cpliakas\DynamoDb\ODM\DocumentManagerInterface
-     */
-    public function setConsistentRead($consistentRead);
-
-    /**
-     * @return bool
-     */
-    public function getConsistentRead();
-
-    /**
-     * @param string $namespace
-     *
-     * @return \Cpliakas\DynamoDb\ODM\DocumentManagerInterface
-     */
-    public function registerEntityNamesapce($namespace);
-
-    /**
-     * @param string $prefix
-     *
-     * @return \Cpliakas\DynamoDb\ODM\DocumentManagerInterface
-     */
-    public function setTablePrefix($prefix);
-
-    /**
-     * @return string
-     */
-    public function getTablePrefix();
-
-    /**
-     * @param string $suffix
-     *
-     * @return \Cpliakas\DynamoDb\ODM\DocumentManagerInterface
-     */
-    public function setTableSuffix($suffix);
-
-    /**
-     * @return string
-     */
-    public function getTableSuffix();
+    public function query($entityClass, ConditionsInterface $conditions, array $options = array());
 }

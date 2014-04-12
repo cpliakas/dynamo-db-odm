@@ -4,7 +4,7 @@ namespace Cpliakas\DynamoDb\ODM;
 
 use Aws\DynamoDb\Enum\ComparisonOperator;
 
-class Conditions extends \ArrayObject
+class Conditions implements ConditionsInterface
 {
     /**
      * @var array
@@ -12,11 +12,7 @@ class Conditions extends \ArrayObject
     protected $conditions = array();
 
     /**
-     * @param type $values
-     * @param array $values
-     * @param string $operator
-     *
-     * @return \DamElastic\Resource\Database\Conditions
+     * {@inheritDoc}
      */
     public function addCondition($attribute, $values, $operator = ComparisonOperator::EQ)
     {
@@ -29,7 +25,7 @@ class Conditions extends \ArrayObject
     }
 
     /**
-     * @return array
+     * {@inheritDoc}
      */
     public function getConditions()
     {

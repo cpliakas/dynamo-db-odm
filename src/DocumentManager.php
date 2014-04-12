@@ -63,6 +63,20 @@ class DocumentManager implements DocumentManagerInterface
     }
 
     /**
+     * @param string $entityClass
+     * @param mixed $data
+     *
+     * @return \Cpliakas\DynamoDb\ODM\EntityInterface
+     *
+     * @throws \DomainException
+     */
+    public function entityFactory($entityClass, $data = array())
+    {
+        $fqcn = $this->getEntityClass($entityClass);
+        return $fqcn::factory($this->dispatcher, $data);
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function create(EntityInterface $entity)
@@ -95,7 +109,7 @@ class DocumentManager implements DocumentManagerInterface
 
         if (isset($model['Item'])) {
             $this->populateEntity($entity, $model['Item']);
-            $this->dispatchEntityRequestEvent(Events::ENTITY_POST_READ, $entity, $model);
+            $this->dispatchEntityResponseEvent(Events::ENTITY_POST_READ, $entity, $model);
             return $entity;
         }
 
@@ -107,9 +121,9 @@ class DocumentManager implements DocumentManagerInterface
      */
     public function update(EntityInterface $entity)
     {
-        $this->dispatchEntityEvent(Events::ENTITY_PRE_UPDATE, $entity);
+        $this->dispatchEntityRequestEvent(Events::ENTITY_PRE_UPDATE, $entity);
         $model = $this->save($entity);
-        $this->dispatchEntitySaveEvent(Events::ENTITY_POST_UPDATE, $entity, $model);
+        $this->dispatchEntityResponseEvent(Events::ENTITY_POST_UPDATE, $entity, $model);
         return true;
     }
 
@@ -166,7 +180,7 @@ class DocumentManager implements DocumentManagerInterface
     /**
      * {@inheritDoc}
      */
-    public function query($entityClass, Conditions $conditions, array $options = array())
+    public function query($entityClass, ConditionsInterface $conditions, array $options = array())
     {
         $query = array(
             'TableName' => $this->getEntityTable($entityClass),
@@ -210,7 +224,7 @@ class DocumentManager implements DocumentManagerInterface
     }
 
     /**
-     * {@inheritDoc}
+     * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
      *
      * @return \Cpliakas\DynamoDb\ODM\DocumentManager
      */
@@ -221,7 +235,7 @@ class DocumentManager implements DocumentManagerInterface
     }
 
     /**
-     * {@inheritDoc}
+     * @return \Symfony\Component\EventDispatcher\EventDispatcherInterface
      */
     public function getDispatcher()
     {
@@ -229,7 +243,7 @@ class DocumentManager implements DocumentManagerInterface
     }
 
     /**
-     * {@inheritDoc}
+     * @param bool $consistentRead
      *
      * @return \Cpliakas\DynamoDb\ODM\DocumentManager
      */
@@ -240,7 +254,7 @@ class DocumentManager implements DocumentManagerInterface
     }
 
     /**
-     * {@inheritDoc}
+     * @return bool
      */
     public function getConsistentRead()
     {
@@ -248,7 +262,7 @@ class DocumentManager implements DocumentManagerInterface
     }
 
     /**
-     * {@inheritDoc}
+     * @param string $namespace
      *
      * @return \Cpliakas\DynamoDb\ODM\DocumentManager
      */
@@ -259,7 +273,7 @@ class DocumentManager implements DocumentManagerInterface
     }
 
     /**
-     * {@inheritDoc}
+     * @param string $prefix
      *
      * @return \Cpliakas\DynamoDb\ODM\DocumentManager
      */
@@ -270,7 +284,7 @@ class DocumentManager implements DocumentManagerInterface
     }
 
     /**
-     * {@inheritDoc}
+     * @return string
      */
     public function getTablePrefix()
     {
@@ -278,7 +292,7 @@ class DocumentManager implements DocumentManagerInterface
     }
 
     /**
-     * {@inheritDoc}
+     * @param string $suffix
      *
      * @return \Cpliakas\DynamoDb\ODM\DocumentManager
      */
@@ -289,7 +303,7 @@ class DocumentManager implements DocumentManagerInterface
     }
 
     /**
-     * {@inheritDoc}
+     * @return string
      */
     public function getTableSuffix()
     {
@@ -303,7 +317,7 @@ class DocumentManager implements DocumentManagerInterface
      *
      * @throws \DomainException
      */
-    public function getEntityClass($entityClass)
+    protected function getEntityClass($entityClass)
     {
         $found = class_exists($entityClass);
 
@@ -329,26 +343,12 @@ class DocumentManager implements DocumentManagerInterface
 
     /**
      * @param string $entityClass
-     * @param mixed $data
-     *
-     * @return \Cpliakas\DynamoDb\ODM\EntityInterface
-     *
-     * @throws \DomainException
-     */
-    public function entityFactory($entityClass, $data = array())
-    {
-        $fqcn = $this->getEntityClass($entityClass);
-        return $fqcn::factory($this->dispatcher, $data);
-    }
-
-    /**
-     * @param string $entityClass
      *
      * @return \Cpliakas\DynamoDb\ODM\EntityInterface|string
      *
      * @throws \DomainException
      */
-    public function getEntityTable($entity)
+    protected function getEntityTable($entity)
     {
         if (!$entity instanceof EntityInterface) {
             $entity = $this->getEntityClass($entity);
@@ -359,11 +359,11 @@ class DocumentManager implements DocumentManagerInterface
     /**
      * Renders the key conditions.
      *
-     * @param \Cpliakas\DynamoDb\ODM\Conditions
+     * @param \Cpliakas\DynamoDb\ODM\ConditionsInterface
      *
      * @return array
      */
-    public function renderConditions(Conditions $conditions)
+    protected function renderConditions(ConditionsInterface $conditions)
     {
         $rendered = array();
         foreach ($conditions->getConditions() as $attribute => $condition) {
@@ -380,7 +380,7 @@ class DocumentManager implements DocumentManagerInterface
      *
      * @return array
      */
-    public function flattenArray(array $item)
+    protected function flattenArray(array $item)
     {
         $array = array();
         foreach ($item as $property => $value) {
@@ -393,7 +393,7 @@ class DocumentManager implements DocumentManagerInterface
      * @param \Cpliakas\DynamoDb\ODM\EntityInterface $entity
      * @param array $item
      */
-    public function populateEntity(EntityInterface $entity, array $item)
+    protected function populateEntity(EntityInterface $entity, array $item)
     {
         if ($entity instanceof \ArrayObject) {
             $entity->exchangeArray($this->flattenArray($item));
@@ -410,7 +410,7 @@ class DocumentManager implements DocumentManagerInterface
      *
      * @return array
      */
-    public function formatKeyCondition(EntityInterface $entity)
+    protected function formatKeyCondition(EntityInterface $entity)
     {
         $attributes = array(
             $entity::getPrimaryKeyAttribute() => $entity->getPrimaryKey(),
