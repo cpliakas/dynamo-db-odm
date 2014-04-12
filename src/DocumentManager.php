@@ -78,6 +78,8 @@ class DocumentManager implements DocumentManagerInterface
 
     /**
      * {@inheritDoc}
+     *
+     * @throws \Aws\DynamoDb\Exception\DynamoDBException
      */
     public function create(EntityInterface $entity)
     {
@@ -89,6 +91,8 @@ class DocumentManager implements DocumentManagerInterface
 
     /**
      * {@inheritDoc}
+     *
+     * @throws \Aws\DynamoDb\Exception\DynamoDBException
      *
      * @see http://docs.aws.amazon.com/aws-sdk-php/guide/latest/service-dynamodb.html#retrieving-items
      */
@@ -118,6 +122,8 @@ class DocumentManager implements DocumentManagerInterface
 
     /**
      * {@inheritDoc}
+     *
+     * @throws \Aws\DynamoDb\Exception\DynamoDBException
      */
     public function update(EntityInterface $entity)
     {
@@ -129,6 +135,8 @@ class DocumentManager implements DocumentManagerInterface
 
     /**
      * {@inheritDoc}
+     *
+     * @throws \Aws\DynamoDb\Exception\DynamoDBException
      *
      * @see http://docs.aws.amazon.com/aws-sdk-php/latest/class-Aws.DynamoDb.DynamoDbClient.html#_deleteItem
      */
@@ -181,6 +189,9 @@ class DocumentManager implements DocumentManagerInterface
      * {@inheritDoc}
      *
      * @see http://docs.aws.amazon.com/aws-sdk-php/guide/latest/service-dynamodb.html#query
+     *
+     * @throws \InvalidArgumentException
+     * @throws \Aws\DynamoDb\Exception\DynamoDBException
      */
     public function query($entityClass, $commandOptions)
     {
@@ -191,6 +202,9 @@ class DocumentManager implements DocumentManagerInterface
      * {@inheritDoc}
      *
      * @see http://docs.aws.amazon.com/aws-sdk-php/guide/latest/service-dynamodb.html#scan
+     *
+     * @throws \InvalidArgumentException
+     * @throws \Aws\DynamoDb\Exception\DynamoDBException
      */
     public function scan($entityClass, $commandOptions)
     {
@@ -203,6 +217,8 @@ class DocumentManager implements DocumentManagerInterface
      * @return \Guzzle\Service\Resource\Model
      *
      * @see http://docs.aws.amazon.com/aws-sdk-php/guide/latest/service-dynamodb.html#adding-items
+     *
+     * @throws \Aws\DynamoDb\Exception\DynamoDBException
      */
     public function save(EntityInterface $entity)
     {
@@ -400,6 +416,7 @@ class DocumentManager implements DocumentManagerInterface
      * @return \Cpliakas\DynamoDb\ODM\EntityInterface[]
      *
      * @throws \InvalidArgumentException
+     * @throws \Aws\DynamoDb\Exception\DynamoDBException
      */
     protected function executeCommand($entityClass, $commandOptions, $command, $optionKey)
     {
