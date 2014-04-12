@@ -104,7 +104,7 @@ class DocumentManager implements DocumentManagerInterface
         $model = $this->dynamoDb->getItem(array(
             'ConsistentRead' => $this->consistentRead,
             'TableName'      => $this->getEntityTable($entity),
-            'Key'            => $this->formatKeyCondition($entity),
+            'Key'            => $this->renderKeyCondition($entity),
         ));
 
         if (isset($model['Item'])) {
@@ -138,7 +138,7 @@ class DocumentManager implements DocumentManagerInterface
 
         $model = $this->dynamoDb->deleteItem(array(
             'TableName' => $this->getEntityTable($entity),
-            'Key' => $this->formatKeyCondition($entity),
+            'Key'       => $this->renderKeyCondition($entity),
         ));
 
         $this->dispatchEntityResponseEvent( Events::ENTITY_POST_DELETE, $entity, $model);
@@ -171,7 +171,7 @@ class DocumentManager implements DocumentManagerInterface
         $model = $this->dynamoDb->getItem(array(
             'ConsistentRead' => $this->consistentRead,
             'TableName'      => $this->getEntityTable($entity),
-            'Key'            => $this->formatKeyCondition($entity),
+            'Key'            => $this->renderKeyCondition($entity),
         ));
 
         return isset($model['Item']);
@@ -179,27 +179,22 @@ class DocumentManager implements DocumentManagerInterface
 
     /**
      * {@inheritDoc}
+     *
+     * @see http://docs.aws.amazon.com/aws-sdk-php/guide/latest/service-dynamodb.html#query
      */
-    public function query($entityClass, ConditionsInterface $conditions, array $options = array())
+    public function query($entityClass, $commandOptions)
     {
-        $query = array(
-            'TableName' => $this->getEntityTable($entityClass),
-            'KeyConditions' => $this->renderConditions($conditions),
-        ) + $options;
+        return $this->executeCommand($entityClass, $commandOptions, 'Query', 'KeyConditions');
+    }
 
-        $iterator = $this->dynamoDb->getIterator('Query', $query);
-
-        $entities = array();
-        foreach ($iterator as $item) {
-            $data = array();
-            foreach ($item as $attribute => $value) {
-                $rawValue = current($value);
-                $data[$attribute] = (key($value) != 'N') ? (string) $rawValue : (int) $rawValue;
-            }
-            $entities[] = $this->entityFactory($entityClass, $data);
-        }
-
-        return $entities;
+    /**
+     * {@inheritDoc}
+     *
+     * @see http://docs.aws.amazon.com/aws-sdk-php/guide/latest/service-dynamodb.html#scan
+     */
+    public function scan($entityClass, $commandOptions)
+    {
+        return $this->executeCommand($entityClass, $commandOptions, 'Scan', 'ScanFilter');
     }
 
     /**
@@ -357,9 +352,28 @@ class DocumentManager implements DocumentManagerInterface
     }
 
     /**
+     * @param \Cpliakas\DynamoDb\ODM\EntityInterface $entity
+     *
+     * @return array
+     */
+    protected function renderKeyCondition(EntityInterface $entity)
+    {
+        $attributes = array(
+            $entity::getPrimaryKeyAttribute() => $entity->getPrimaryKey(),
+        );
+
+        $rangeKeyAttribute = $entity::getRangeKeyAttribute();
+        if ($rangeKeyAttribute !== false) {
+            $attributes[$rangeKeyAttribute] = $entity->getRangeKey();
+        }
+
+        return $this->dynamoDb->formatAttributes($attributes);
+    }
+
+    /**
      * Renders the key conditions.
      *
-     * @param \Cpliakas\DynamoDb\ODM\ConditionsInterface
+     * @param \Cpliakas\DynamoDb\ODM\CommandConditionsInterface $conditions
      *
      * @return array
      */
@@ -373,6 +387,42 @@ class DocumentManager implements DocumentManagerInterface
             );
         }
         return $rendered;
+    }
+
+    /**
+     * Executes a scan or query command.
+     *
+     * @param string $entityClass
+     * @param array|\Cpliakas\DynamoDb\ODM\KeyConditionsInterface $options
+     * @param string $command
+     * @param string $optionKey
+     *
+     * @return \Cpliakas\DynamoDb\ODM\EntityInterface[]
+     *
+     * @throws \InvalidArgumentException
+     */
+    protected function executeCommand($entityClass, $commandOptions, $command, $optionKey)
+    {
+        if ($commandOptions instanceof ConditionsInterface) {
+            $commandOptions = array($optionKey => $this->renderConditions($commandOptions));
+        } elseif (!is_array($commandOptions)) {
+            throw new \InvalidArgumentException('Expecting command options to be an array or instance of \Cpliakas\DynamoDb\ODM\KeyConditionsInterface');
+        }
+
+        $commandOptions['TableName'] = $this->getEntityTable($entityClass);
+        $iterator = $this->dynamoDb->getIterator($command, $commandOptions);
+
+        $entities = array();
+        foreach ($iterator as $item) {
+            $data = array();
+            foreach ($item as $attribute => $value) {
+                $rawValue = current($value);
+                $data[$attribute] = (key($value) != 'N') ? (string) $rawValue : (int) $rawValue;
+            }
+            $entities[] = $this->entityFactory($entityClass, $data);
+        }
+
+        return $entities;
     }
 
     /**
@@ -403,25 +453,6 @@ class DocumentManager implements DocumentManagerInterface
                 $entity->setAttribute($attribute, $value);
             }
         }
-    }
-
-    /**
-     * @param \Cpliakas\DynamoDb\ODM\EntityInterface $entity
-     *
-     * @return array
-     */
-    protected function formatKeyCondition(EntityInterface $entity)
-    {
-        $attributes = array(
-            $entity::getPrimaryKeyAttribute() => $entity->getPrimaryKey(),
-        );
-
-        $rangeKeyAttribute = $entity::getRangeKeyAttribute();
-        if ($rangeKeyAttribute !== false) {
-            $attributes[$rangeKeyAttribute] = $entity->getRangeKey();
-        }
-
-        return $this->dynamoDb->formatAttributes($attributes);
     }
 
     /**

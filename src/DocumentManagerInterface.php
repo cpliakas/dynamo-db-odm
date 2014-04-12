@@ -67,11 +67,26 @@ interface DocumentManagerInterface
     public function exists($entityClass, $primaryKey, $rangeKey = null);
 
     /**
-     * @param string $entityClass
-     * @param \Cpliakas\DynamoDb\ODM\ConditionsInterface $conditions
-     * @param array $options
+     * Executes a query command.
      *
-     * @return array
+     * @param string $entityClass
+     * @param array|\Cpliakas\DynamoDb\ODM\ConditionsInterface $commandOptions
+     *
+     * @return \Cpliakas\DynamoDb\ODM\EntityInterface[]
+     *
+     * @throws \InvalidArgumentException
      */
-    public function query($entityClass, ConditionsInterface $conditions, array $options = array());
+    public function query($entityClass, $commandOptions);
+
+    /**
+     * Executes a scan command.
+     *
+     * @param string $entityClass
+     * @param array|\Cpliakas\DynamoDb\ODM\ConditionsInterface $commandOptions
+     *
+     * @return \Cpliakas\DynamoDb\ODM\EntityInterface[]
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function scan($entityClass, $commandOptions);
 }
