@@ -19,12 +19,16 @@
         "doctrine/cache": "*"
     },
     "require-dev": {
+        "ircmaxell/password-compat": "~1.0",
         "pdepend/pdepend": "~1.0",
         "phploc/phploc": "~2.0",
         "phpmd/phpmd": "~1.0",
         "phpunit/phpunit": "~3.0",
         "satooshi/php-coveralls": "*",
         "sebastian/phpcpd": "~2.0"
+    },
+    "suggest": {
+        "ircmaxell/password-compat": "Enables the password transformer for PHP <=5.4"
     },
     "autoload": {
         "psr-4": {
