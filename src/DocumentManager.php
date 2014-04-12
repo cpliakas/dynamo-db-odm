@@ -357,7 +357,11 @@ class DocumentManager implements DocumentManagerInterface
     }
 
     /**
-     * {@inheritDoc}
+     * Renders the key conditions.
+     *
+     * @param \Cpliakas\DynamoDb\ODM\Conditions
+     *
+     * @return array
      */
     public function renderConditions(Conditions $conditions)
     {
