@@ -27,8 +27,8 @@ interface DocumentManagerInterface
 
     /**
      * @param string $entityClass
-     * @param string $primaryKey
-     * @param string|null $rangeKey
+     * @param mixed $primaryKey
+     * @param mixed|null $rangeKey
      *
      * @return \Cpliakas\DynamoDb\ODM\EntityInterface|false
      */
@@ -50,8 +50,8 @@ interface DocumentManagerInterface
 
     /**
      * @param string $entityClass
-     * @param string $primaryKey
-     * @param string|null $rangeKey
+     * @param mixed $primaryKey
+     * @param mixed|null $rangeKey
      *
      * @return bool
      */
@@ -59,8 +59,8 @@ interface DocumentManagerInterface
 
     /**
      * @param string $entityClass
-     * @param string $primaryKey
-     * @param string|null $rangeKey
+     * @param mixed $primaryKey
+     * @param mixed|null $rangeKey
      *
      * @return bool
      */

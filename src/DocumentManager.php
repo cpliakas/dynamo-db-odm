@@ -421,7 +421,7 @@ class DocumentManager implements DocumentManagerInterface
     protected function executeCommand($entityClass, $commandOptions, $command, $optionKey)
     {
         if ($commandOptions instanceof ConditionsInterface) {
-            $commandOptions = array($optionKey => $this->renderConditions($commandOptions));
+            $commandOptions = array($optionKey => $this->renderConditions($commandOptions)) + $commandOptions->getOptions();
         } elseif (!is_array($commandOptions)) {
             throw new \InvalidArgumentException('Expecting command options to be an array or instance of \Cpliakas\DynamoDb\ODM\KeyConditionsInterface');
         }
