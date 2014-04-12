@@ -70,6 +70,26 @@ interface EntityInterface
     public function getRangeKey();
 
     /**
+     * Sets an attribute's value.
+     *
+     * @param string $attribute
+     * @param mixed $value
+     * @param string|null $dataType
+     *
+     * @return \Cpliakas\DynamoDb\ODM\EntityInterface
+     */
+    public function setAttribute($attribute, $value, $dataType = null);
+
+    /**
+     * Returns an attribute's value.
+     *
+     * @param string $attribute
+     *
+     * @return mixed
+     */
+    public function getAttribute($attribute);
+
+    /**
      * Adds an attribute renderer.
      *
      * Renderers convert the value stored in the database to a normalized value
@@ -94,24 +114,4 @@ interface EntityInterface
      * @return \Cpliakas\DynamoDb\ODM\EntityInterface
      */
     public function addTransformer($attribute, Transformer\AttributeTransformerInterface $transformer);
-
-    /**
-     * Sets an attribute's value.
-     *
-     * @param string $attribute
-     * @param mixed $value
-     * @param string|null $dataType
-     *
-     * @return \Cpliakas\DynamoDb\ODM\EntityInterface
-     */
-    public function setAttribute($attribute, $value, $dataType = null);
-
-    /**
-     * Returns an attribute's value.
-     *
-     * @param string $attribute
-     *
-     * @return mixed
-     */
-    public function getAttribute($attribute);
 }

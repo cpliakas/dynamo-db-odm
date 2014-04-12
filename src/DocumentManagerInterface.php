@@ -71,7 +71,7 @@ interface DocumentManagerInterface
      * @param \Cpliakas\DynamoDb\ODM\ConditionsInterface $conditions
      * @param array $options
      *
-     * @return
+     * @return array
      */
     public function query($entityClass, ConditionsInterface $conditions, array $options = array());
 }
