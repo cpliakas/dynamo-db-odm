@@ -96,13 +96,9 @@ class DocumentManager implements DocumentManagerInterface
      *
      * @see http://docs.aws.amazon.com/aws-sdk-php/guide/latest/service-dynamodb.html#retrieving-items
      */
-    public function read($entityClass, $primaryKey, $rangeKey = null)
+    public function read($entityClass, $key)
     {
-        $entity = $this->entityFactory($entityClass)
-            ->setPrimaryKey($primaryKey)
-            ->setRangeKey($rangeKey)
-        ;
-
+        $entity = $this->initEntity($entityClass, $key);
         $this->dispatchEntityRequestEvent(Events::ENTITY_PRE_READ, $entity);
 
         $model = $this->dynamoDb->getItem(array(
@@ -156,25 +152,18 @@ class DocumentManager implements DocumentManagerInterface
     /**
      * {@inheritDoc}
      */
-    public function deleteByKey($entityClass, $primaryKey, $rangeKey = null)
+    public function deleteByKey($entityClass, $key)
     {
-        $entity = $this->entityFactory($entityClass)
-            ->setPrimaryKey($primaryKey)
-            ->setRangeKey($rangeKey)
-        ;
-
+        $entity = $this->initEntity($entityClass, $key);
         return $this->delete($entity);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function exists($entityClass, $primaryKey, $rangeKey = null)
+    public function exists($entityClass, $key)
     {
-        $entity = $this->entityFactory($entityClass)
-            ->setPrimaryKey($primaryKey)
-            ->setRangeKey($rangeKey)
-        ;
+        $entity = $this->initEntity($entityClass, $key);
 
         $model = $this->dynamoDb->getItem(array(
             'ConsistentRead' => $this->consistentRead,
@@ -365,6 +354,32 @@ class DocumentManager implements DocumentManagerInterface
             $entity = $this->getEntityClass($entity);
         }
         return $this->tablePrefix . $entity::getTable() . $this->tableSuffix;
+    }
+
+    /**
+     * Initializes an entity with a primary and range key.
+     *
+     * @param string $entityClass
+     * @param mixed $key
+     *
+     * @return \Cpliakas\DynamoDb\ODM\EntityInterface
+     *
+     * @throw new \InvalidArgumentException
+     */
+    protected function initEntity($entityClass, $key)
+    {
+        $keys = (array) $key;
+
+        if (!isset($key[0])) {
+            throw new \InvalidArgumentException('Primary key required');
+        }
+
+        $entity = $this->entityFactory($entityClass)->setPrimaryKey($key[0]);
+        if (isset($keys[1])) {
+            $entity->setRangeKey($keys[1]);
+        }
+
+        return $entity;
     }
 
     /**
