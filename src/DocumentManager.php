@@ -9,6 +9,10 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class DocumentManager implements DocumentManagerInterface
 {
+    const CONSUMED_CAPACITY_NONE    = 'NONE';
+    const CONSUMED_CAPACITY_TOTAL   = 'TOTAL';
+    const CONSUMED_CAPACITY_INDEXES = 'INDEXES';
+
     /**
      * @var \Aws\DynamoDb\DynamoDbClient
      */
@@ -23,6 +27,11 @@ class DocumentManager implements DocumentManagerInterface
      * @var bool
      */
     protected $consistentRead;
+
+    /**
+     * @var string
+     */
+    protected $returnConsumedCapacity;
 
     /**
      * @var array
@@ -50,16 +59,18 @@ class DocumentManager implements DocumentManagerInterface
         $this->dispatcher = $dispatcher ?: new EventDispatcher();
 
         $conf += array(
-            'entity.consistent_read' => true,
-            'entity.namespaces'      => array(),
-            'table.prefix'           => '',
-            'table.suffix'           => '',
+            'command.consistent_read'          => false,
+            'command.return_consumed_capacity' => self::CONSUMED_CAPACITY_NONE,
+            'entity.namespaces'                => array(),
+            'table.prefix'                     => '',
+            'table.suffix'                     => '',
         );
 
-        $this->consistentRead   = (bool) $conf['entity.consistent_read'];
-        $this->entityNamespaces = $conf['entity.namespaces'];
-        $this->tablePrefix      = $conf['table.prefix'];
-        $this->tableSuffix      = $conf['table.suffix'];
+        $this->consistentRead         = (bool) $conf['command.consistent_read'];
+        $this->returnConsumedCapacity = $conf['command.return_consumed_capacity'];
+        $this->entityNamespaces       = $conf['entity.namespaces'];
+        $this->tablePrefix            = $conf['table.prefix'];
+        $this->tableSuffix            = $conf['table.suffix'];
     }
 
     /**
@@ -102,9 +113,10 @@ class DocumentManager implements DocumentManagerInterface
         $this->dispatchEntityRequestEvent(Events::ENTITY_PRE_READ, $entity);
 
         $model = $this->dynamoDb->getItem(array(
-            'ConsistentRead' => $this->consistentRead,
-            'TableName'      => $this->getEntityTable($entity),
-            'Key'            => $this->renderKeyCondition($entity),
+            'ConsistentRead'         => $this->consistentRead,
+            'TableName'              => $this->getEntityTable($entity),
+            'Key'                    => $this->renderKeyCondition($entity),
+            'ReturnConsumedCapacity' => $this->returnConsumedCapacity,
         ));
 
         if (isset($model['Item'])) {
@@ -166,9 +178,10 @@ class DocumentManager implements DocumentManagerInterface
         $entity = $this->initEntity($entityClass, $key);
 
         $model = $this->dynamoDb->getItem(array(
-            'ConsistentRead' => $this->consistentRead,
-            'TableName'      => $this->getEntityTable($entity),
-            'Key'            => $this->renderKeyCondition($entity),
+            'ConsistentRead'         => $this->consistentRead,
+            'TableName'              => $this->getEntityTable($entity),
+            'Key'                    => $this->renderKeyCondition($entity),
+            'ReturnConsumedCapacity' => $this->returnConsumedCapacity,
         ));
 
         return isset($model['Item']);
@@ -214,9 +227,9 @@ class DocumentManager implements DocumentManagerInterface
         $this->dispatchEntityRequestEvent(Events::ENTITY_PRE_SAVE, $entity);
 
         $model = $this->dynamoDb->putItem(array(
-            'TableName' => $this->getEntityTable($entity),
-            'Item' => $this->dynamoDb->formatAttributes((array) $entity),
-            'ReturnConsumedCapacity' => 'TOTAL'
+            'TableName'              => $this->getEntityTable($entity),
+            'Item'                   => $this->dynamoDb->formatAttributes((array) $entity),
+            'ReturnConsumedCapacity' => $this->returnConsumedCapacity,
         ));
 
         $this->dispatchEntityRequestEvent(Events::ENTITY_POST_SAVE, $entity);
@@ -247,7 +260,7 @@ class DocumentManager implements DocumentManagerInterface
      *
      * @return \Cpliakas\DynamoDb\ODM\DocumentManager
      */
-    public function setConsistentRead($consistentRead)
+    public function consistentRead($consistentRead = true)
     {
         $this->consistentRead = (bool) $consistentRead;
         return $this;
@@ -259,6 +272,25 @@ class DocumentManager implements DocumentManagerInterface
     public function getConsistentRead()
     {
         return $this->consistentRead;
+    }
+
+    /**
+     * @param string $type
+     *
+     * @return \Cpliakas\DynamoDb\ODM\DocumentManager
+     */
+    public function returnConsumedCapacity($type)
+    {
+        $this->returnConsumedCapacity = $type;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getReturnConsumedCapacity()
+    {
+        return $this->returnConsumedCapacity;
     }
 
     /**
@@ -442,6 +474,11 @@ class DocumentManager implements DocumentManagerInterface
         }
 
         $commandOptions['TableName'] = $this->getEntityTable($entityClass);
+        $commandOptions += array(
+            'ConsistentRead'         => $this->consistentRead,
+            'ReturnConsumedCapacity' => $this->returnConsumedCapacity,
+        );
+
         $iterator = $this->dynamoDb->getIterator($command, $commandOptions);
 
         $entities = array();
