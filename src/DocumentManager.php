@@ -235,7 +235,7 @@ class DocumentManager implements DocumentManagerInterface
 
         $commandOptions = array(
             'TableName'              => $this->getEntityTable($entity),
-            'Item'                   => $this->formatAttributes($entity, $entity->getAttributes()),
+            'Item'                   => $this->formatEntityAttributes($entity),
             'ReturnConsumedCapacity' => $this->returnConsumedCapacity,
         );
 
@@ -426,11 +426,24 @@ class DocumentManager implements DocumentManagerInterface
     }
 
     /**
-     * Converts an array into something
+     * Formats an entity's attributes to the SDK's native data structure.
      *
-     * @param \Cpliakas\DynamoDb\ODM\EntityInterface|string $entity
+     * @param \Cpliakas\DynamoDb\ODM\EntityInterface $entity
+     * @param string $format
+     *
+     * @return array
+     */
+    protected function formatEntityAttributes(EntityInterface $entity, $format = Attribute::FORMAT_PUT)
+    {
+        return $this->formatAttributes(get_class($entity), $entity->getAttributes());
+    }
+
+    /**
+     * Formats an array of attributes to the SDK's native data structure.
+     *
+     * @param string $entityClass
      * @param array $attributes
-     * @param string
+     * @param string $format
      *
      * @return array
      *
@@ -438,18 +451,12 @@ class DocumentManager implements DocumentManagerInterface
      *
      * @see \Aws\DynamoDb\DynamoDbClient::formatAttributes()
      */
-    protected function formatAttributes($entity, array $attributes, $format = Attribute::FORMAT_PUT)
+    protected function formatAttributes($entityClass, array $attributes, $format = Attribute::FORMAT_PUT)
     {
-        // Ensure entity is a class or a fully qualified class name.
-        if (is_string($entity)) {
-            $entity = $this->getEntityClass($entity);
-        } elseif (!$entity instanceof EntityInterface) {
-            throw new \InvalidArgumentException('Entity must be an instance of \Cpliakas\DynamoDb\ODM\EntityInterface or a string');
-        }
-
+        $entityClass = $this->getEntityClass($entityClass);
         $formatted = array();
 
-        $mappings = $entity::getDataTypeMappings();
+        $mappings = $entityClass::getDataTypeMappings();
         foreach ($attributes as $attribute => $value) {
             if (isset($mappings[$attribute])) {
                 $dataType = $mappings[$attribute];
@@ -482,7 +489,7 @@ class DocumentManager implements DocumentManagerInterface
             $attributes[$rangeKeyAttribute] = $entity->getRangeKey();
         }
 
-        return $this->formatAttributes($entity, $attributes);
+        return $this->formatAttributes(get_class($entity), $attributes);
     }
 
     /**
@@ -569,7 +576,7 @@ class DocumentManager implements DocumentManagerInterface
     protected function populateEntity(EntityInterface $entity, array $item)
     {
         $attributes = $this->flattenArray($item);
-        $entity->setAttributes($item);
+        $entity->setAttributes($attributes);
     }
 
     /**
