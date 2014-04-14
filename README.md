@@ -31,6 +31,7 @@ static properties and accessed through the static methods defined in
 
 namespace Acme\Entity
 
+use Aws\DynamoDb\Enum\Type;
 use Cpliakas\DynamoDb\ODM\Entity
 
 class Book extends Entity
@@ -42,6 +43,11 @@ class Book extends Entity
     protected static $hashKeyAttribute = 'isbn';
 
     // Optionally set the $rangeKeyAttribute static if appropriate
+
+    // Optionally map attributes to data types
+    protected static $dataTypeMappings = array(
+        'isbn' => Type::STRING,
+    );
 
     // Optionally add attribute setters and getters to taste
     public function setIsbn($isbn)
@@ -57,7 +63,7 @@ class Book extends Entity
 }
 ```
 
-*NOTE:* Other O*Ms use [annotations](https://github.com/doctrine/annotations)
+*NOTE:* Other ODMs use [annotations](https://github.com/doctrine/annotations)
 to define metadata. This pattern can improve DX for applications with a large
 number of entities and improve performance when proper caching is implemented,
 however this library intentionally chooses to use statics to define metadata
@@ -126,7 +132,7 @@ $dm->delete($book);
 
 ```
 
-*NOTE:* Other O*Ms use the [unit of work pattern](http://robrich.org/archive/2012/04/18/design-patterns-for-data-persistence-unit-of-work-pattern-and.aspx)
+*NOTE:* Other ODMs use the [unit of work pattern](http://robrich.org/archive/2012/04/18/design-patterns-for-data-persistence-unit-of-work-pattern-and.aspx)
 when persisting data to the backend. Due to the nature of DynamoDB and the
 desire to keep this library light-weight, we opted not to use this pattern.
 
