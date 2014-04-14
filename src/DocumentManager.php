@@ -112,12 +112,14 @@ class DocumentManager implements DocumentManagerInterface
         $entity = $this->initEntity($entityClass, $primaryKey);
         $this->dispatchEntityRequestEvent(Events::ENTITY_PRE_READ, $entity);
 
-        $model = $this->dynamoDb->getItem(array(
+        $commandOption = array(
             'ConsistentRead'         => $this->consistentRead,
             'TableName'              => $this->getEntityTable($entity),
             'Key'                    => $this->renderKeyCondition($entity),
             'ReturnConsumedCapacity' => $this->returnConsumedCapacity,
-        ));
+        );
+
+        $model = $this->dynamoDb->getItem($commandOption);
 
         if (isset($model['Item'])) {
             $this->populateEntity($entity, $model['Item']);
@@ -152,10 +154,12 @@ class DocumentManager implements DocumentManagerInterface
     {
         $this->dispatchEntityRequestEvent(Events::ENTITY_PRE_DELETE, $entity);
 
-        $model = $this->dynamoDb->deleteItem(array(
+        $commandOptions = array(
             'TableName' => $this->getEntityTable($entity),
             'Key'       => $this->renderKeyCondition($entity),
-        ));
+        );
+
+        $model = $this->dynamoDb->deleteItem($commandOptions);
 
         $this->dispatchEntityResponseEvent( Events::ENTITY_POST_DELETE, $entity, $model);
         return true;
@@ -177,12 +181,14 @@ class DocumentManager implements DocumentManagerInterface
     {
         $entity = $this->initEntity($entityClass, $primaryKey);
 
-        $model = $this->dynamoDb->getItem(array(
+        $commandOptions = array(
             'ConsistentRead'         => $this->consistentRead,
             'TableName'              => $this->getEntityTable($entity),
             'Key'                    => $this->renderKeyCondition($entity),
             'ReturnConsumedCapacity' => $this->returnConsumedCapacity,
-        ));
+        );
+
+        $model = $this->dynamoDb->getItem($commandOptions);
 
         return isset($model['Item']);
     }
@@ -226,11 +232,13 @@ class DocumentManager implements DocumentManagerInterface
     {
         $this->dispatchEntityRequestEvent(Events::ENTITY_PRE_SAVE, $entity);
 
-        $model = $this->dynamoDb->putItem(array(
+        $commandOptions = array(
             'TableName'              => $this->getEntityTable($entity),
             'Item'                   => $this->dynamoDb->formatAttributes((array) $entity),
             'ReturnConsumedCapacity' => $this->returnConsumedCapacity,
-        ));
+        );
+
+        $model = $this->dynamoDb->putItem($commandOptions);
 
         $this->dispatchEntityRequestEvent(Events::ENTITY_POST_SAVE, $entity);
         return $model;

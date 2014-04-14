@@ -90,12 +90,13 @@ $dm->registerEntityNamesapce('Acme\Entity');
 
 ```
 
-### CRUD operations
+### CRUD Operations
 
 Create an entity.
 
 ```php
-// Instantiate the entity object, "Book" is the entity's class name.
+// Instantiate the entity object, "Book" is the entity's class name as defined
+// in the "Defining Entities" example above.
 $book = $dm->entityFactory('Book')
     ->setHash('0-1234-5678-9')
     ->setAttribute('title', 'The Book Title')
