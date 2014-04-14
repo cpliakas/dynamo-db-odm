@@ -39,6 +39,15 @@ interface EntityInterface
     public static function getRangeKeyAttribute();
 
     /**
+     * Returns a mapping of attribute names to their corresponding data types.
+     *
+     * @return array
+     *
+     * @see Aws\DynamoDb\Enum\Type
+     */
+    public static function getDataTypeMappings();
+
+    /**
      * Sets the value of the primary key's hash attribute.
      *
      * @param mixed $hash

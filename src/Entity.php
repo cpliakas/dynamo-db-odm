@@ -37,6 +37,11 @@ class Entity extends \ArrayObject implements EntityInterface
     protected static $rangeKeyAttribute = false;
 
     /**
+     * @var array
+     */
+    protected static $dataTypeMappings = array();
+
+    /**
      * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
      * @param array $data
      */
@@ -78,6 +83,14 @@ class Entity extends \ArrayObject implements EntityInterface
     public static function getRangeKeyAttribute()
     {
         return static::$rangeKeyAttribute;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public static function getDataTypeMappings()
+    {
+        return static::$dataTypeMappings;
     }
 
     /**

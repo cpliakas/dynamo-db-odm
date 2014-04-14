@@ -116,7 +116,7 @@ class DocumentManager implements DocumentManagerInterface
         $commandOption = array(
             'ConsistentRead'         => $this->consistentRead,
             'TableName'              => $this->getEntityTable($entity),
-            'Key'                    => $this->renderKeyCondition($entity),
+            'Key'                    => $this->formatKeyCondition($entity),
             'ReturnConsumedCapacity' => $this->returnConsumedCapacity,
         );
 
@@ -157,7 +157,7 @@ class DocumentManager implements DocumentManagerInterface
 
         $commandOptions = array(
             'TableName' => $this->getEntityTable($entity),
-            'Key'       => $this->renderKeyCondition($entity),
+            'Key'       => $this->formatKeyCondition($entity),
         );
 
         $model = $this->dynamoDb->deleteItem($commandOptions);
@@ -185,7 +185,7 @@ class DocumentManager implements DocumentManagerInterface
         $commandOptions = array(
             'ConsistentRead'         => $this->consistentRead,
             'TableName'              => $this->getEntityTable($entity),
-            'Key'                    => $this->renderKeyCondition($entity),
+            'Key'                    => $this->formatKeyCondition($entity),
             'ReturnConsumedCapacity' => $this->returnConsumedCapacity,
         );
 
@@ -235,7 +235,7 @@ class DocumentManager implements DocumentManagerInterface
 
         $commandOptions = array(
             'TableName'              => $this->getEntityTable($entity),
-            'Item'                   => $this->dynamoDb->formatAttributes((array) $entity),
+            'Item'                   => $this->formatAttributes($entity, $entity->getAttributes()),
             'ReturnConsumedCapacity' => $this->returnConsumedCapacity,
         );
 
@@ -383,6 +383,8 @@ class DocumentManager implements DocumentManagerInterface
     }
 
     /**
+     * Returns the entity's table name as defined in DynamoDB.
+     *
      * @param string $entityClass
      *
      * @return \Cpliakas\DynamoDb\ODM\EntityInterface|string
@@ -424,11 +426,52 @@ class DocumentManager implements DocumentManagerInterface
     }
 
     /**
+     * Converts an array into something
+     *
+     * @param \Cpliakas\DynamoDb\ODM\EntityInterface|string $entity
+     * @param array $attributes
+     * @param string
+     *
+     * @return array
+     *
+     * @throws \InvalidArgumentException
+     *
+     * @see \Aws\DynamoDb\DynamoDbClient::formatAttributes()
+     */
+    protected function formatAttributes($entity, array $attributes, $format = Attribute::FORMAT_PUT)
+    {
+        // Ensure entity is a class or a fully qualified class name.
+        if (is_string($entity)) {
+            $entity = $this->getEntityClass($entity);
+        } elseif (!$entity instanceof EntityInterface) {
+            throw new \InvalidArgumentException('Entity must be an instance of \Cpliakas\DynamoDb\ODM\EntityInterface or a string');
+        }
+
+        $formatted = array();
+
+        $mappings = $entity::getDataTypeMappings();
+        foreach ($attributes as $attribute => $value) {
+            if (isset($mappings[$attribute])) {
+                $dataType = $mappings[$attribute];
+                if (Attribute::FORMAT_PUT == $format) {
+                    $formatted[$attribute] = array($dataType => $value);
+                } else {
+                    $formatted[$attribute] = array('Value' => array($dataType => $value));
+                }
+            } else {
+                $formatted[$attribute] = Attribute::factory($value)->getFormatted($format);
+            }
+        }
+
+        return $formatted;
+    }
+
+    /**
      * @param \Cpliakas\DynamoDb\ODM\EntityInterface $entity
      *
      * @return array
      */
-    protected function renderKeyCondition(EntityInterface $entity)
+    protected function formatKeyCondition(EntityInterface $entity)
     {
         $attributes = array(
             $entity::getHashKeyAttribute() => $entity->getHashKey(),
@@ -439,7 +482,7 @@ class DocumentManager implements DocumentManagerInterface
             $attributes[$rangeKeyAttribute] = $entity->getRangeKey();
         }
 
-        return $this->dynamoDb->formatAttributes($attributes);
+        return $this->formatAttributes($entity, $attributes);
     }
 
     /**
@@ -449,12 +492,12 @@ class DocumentManager implements DocumentManagerInterface
      *
      * @return array
      */
-    protected function renderConditions(ConditionsInterface $conditions)
+    protected function formatConditions($entityClass, ConditionsInterface $conditions)
     {
         $rendered = array();
         foreach ($conditions->getConditions() as $attribute => $condition) {
             $rendered[$attribute] = array(
-                'AttributeValueList' => $this->dynamoDb->formatAttributes($condition['values']),
+                'AttributeValueList' => $this->formatAttributes($entityClass, $condition['values']),
                 'ComparisonOperator' => $condition['operator'],
             );
         }
@@ -477,7 +520,9 @@ class DocumentManager implements DocumentManagerInterface
     protected function executeCommand($entityClass, $commandOptions, $command, $optionKey)
     {
         if ($commandOptions instanceof ConditionsInterface) {
-            $commandOptions = array($optionKey => $this->renderConditions($commandOptions)) + $commandOptions->getOptions();
+            $commandOptions = array(
+                $optionKey => $this->formatConditions($entityClass, $commandOptions)
+            ) + $commandOptions->getOptions();
         } elseif (!is_array($commandOptions)) {
             throw new \InvalidArgumentException('Expecting command options to be an array or instance of \Cpliakas\DynamoDb\ODM\KeyConditionsInterface');
         }
