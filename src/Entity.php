@@ -29,12 +29,12 @@ class Entity extends \ArrayObject implements EntityInterface
     /**
      * @var string
      */
-    protected static $primaryKeyAttribute;
+    protected static $hashAttribute;
 
     /**
      * @var string
      */
-    protected static $rangeKeyAttribute = false;
+    protected static $rangeAttribute = false;
 
     /**
      * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
@@ -67,51 +67,51 @@ class Entity extends \ArrayObject implements EntityInterface
     /**
      * {@inheritDoc}
      */
-    public static function getPrimaryKeyAttribute()
+    public static function getHashAttribute()
     {
-        return static::$primaryKeyAttribute;
+        return static::$hashAttribute;
     }
 
     /**
      * {@inheritDoc}
      */
-    public static function getRangeKeyAttribute()
+    public static function getRangeAttribute()
     {
-        return static::$rangeKeyAttribute;
+        return static::$rangeAttribute;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function setPrimaryKey($primaryKey)
+    public function setHash($hash)
     {
-        $this[static::$primaryKeyAttribute] = $primaryKey;
+        $this->setAttribute(static::$hashAttribute, $hash);
         return $this;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getPrimaryKey()
+    public function getHash()
     {
-        return $this[static::$primaryKeyAttribute];
+        return $this->getAttribute(static::$hashAttribute);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function setRangeKey($rangeKey)
+    public function setRange($range)
     {
-        $this[static::$rangeKeyAttribute] = $rangeKey;
+        $this->setAttribute(static::$rangeAttribute, $range);
         return $this;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getRangeKey()
+    public function getRange()
     {
-        return $this[static::$rangeKeyAttribute];
+        return $this->getAttribute(static::$rangeAttribute);
     }
 
     /**

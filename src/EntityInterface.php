@@ -24,50 +24,51 @@ interface EntityInterface
     public static function getTable();
 
     /**
-     * Returns the attribute containing the primary key.
+     * Returns the attribute containing the primary key's hash.
      *
      * @return string
      */
-    public static function getPrimaryKeyAttribute();
+    public static function getHashAttribute();
 
     /**
-     * Returns the attribute containing the range key, false if there is none.
+     * Returns the attribute containing the primary key's range key, false if
+     * there is none.
      *
      * @return string|false
      */
-    public static function getRangeKeyAttribute();
+    public static function getRangeAttribute();
 
     /**
-     * Sets the entity's primary key.
+     * Sets the value of the primary key's hash attribute.
      *
-     * @param mixed $primaryKey
+     * @param mixed $hash
      *
      * @return \Cpliakas\DynamoDb\ODM\EntityInterface
      */
-    public function setPrimaryKey($primaryKey);
+    public function setHash($hash);
 
     /**
-     * Returns the entity's primary key.
-     *
-     * @return mixed
-     */
-    public function getPrimaryKey();
-
-    /**
-     * Sets the entity's range key.
-     *
-     * @param mixed $rangeKey
-     *
-     * @return \Cpliakas\DynamoDb\ODM\EntityInterface
-     */
-    public function setRangeKey($rangeKey);
-
-    /**
-     * Returns the entity's range key.
+     * Returns the value of the primary key's hash attribute.
      *
      * @return string|false
      */
-    public function getRangeKey();
+    public function getHash();
+
+    /**
+     * Sets the value of the primary key's range attribute.
+     *
+     * @param mixed $range
+     *
+     * @return \Cpliakas\DynamoDb\ODM\EntityInterface
+     */
+    public function setRange($rangeKey);
+
+    /**
+     * Returns the value of the primary key's range attribute.
+     *
+     * @return string|false
+     */
+    public function getRange();
 
     /**
      * Sets an attribute's value.

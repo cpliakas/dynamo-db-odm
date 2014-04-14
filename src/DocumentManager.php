@@ -107,9 +107,9 @@ class DocumentManager implements DocumentManagerInterface
      *
      * @see http://docs.aws.amazon.com/aws-sdk-php/guide/latest/service-dynamodb.html#retrieving-items
      */
-    public function read($entityClass, $key)
+    public function read($entityClass, $primaryKey)
     {
-        $entity = $this->initEntity($entityClass, $key);
+        $entity = $this->initEntity($entityClass, $primaryKey);
         $this->dispatchEntityRequestEvent(Events::ENTITY_PRE_READ, $entity);
 
         $model = $this->dynamoDb->getItem(array(
@@ -164,18 +164,18 @@ class DocumentManager implements DocumentManagerInterface
     /**
      * {@inheritDoc}
      */
-    public function deleteByKey($entityClass, $key)
+    public function deleteByKey($entityClass, $primaryKey)
     {
-        $entity = $this->initEntity($entityClass, $key);
+        $entity = $this->initEntity($entityClass, $primaryKey);
         return $this->delete($entity);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function exists($entityClass, $key)
+    public function exists($entityClass, $primaryKey)
     {
-        $entity = $this->initEntity($entityClass, $key);
+        $entity = $this->initEntity($entityClass, $primaryKey);
 
         $model = $this->dynamoDb->getItem(array(
             'ConsistentRead'         => $this->consistentRead,
@@ -392,23 +392,23 @@ class DocumentManager implements DocumentManagerInterface
      * Initializes an entity with a primary and range key.
      *
      * @param string $entityClass
-     * @param mixed $key
+     * @param mixed $primaryKey
      *
      * @return \Cpliakas\DynamoDb\ODM\EntityInterface
      *
      * @throw new \InvalidArgumentException
      */
-    protected function initEntity($entityClass, $key)
+    protected function initEntity($entityClass, $primaryKey)
     {
-        $keys = (array) $key;
+        $primaryKey = (array) $primaryKey;
 
-        if (!isset($key[0])) {
-            throw new \InvalidArgumentException('Primary key required');
+        if (!isset($primaryKey[0])) {
+            throw new \InvalidArgumentException('Primary key\'s hash attribute is required');
         }
 
-        $entity = $this->entityFactory($entityClass)->setPrimaryKey($key[0]);
-        if (isset($keys[1])) {
-            $entity->setRangeKey($keys[1]);
+        $entity = $this->entityFactory($entityClass)->setHash($primaryKey[0]);
+        if (isset($primaryKey[1])) {
+            $entity->setRange($primaryKey[1]);
         }
 
         return $entity;
@@ -422,12 +422,12 @@ class DocumentManager implements DocumentManagerInterface
     protected function renderKeyCondition(EntityInterface $entity)
     {
         $attributes = array(
-            $entity::getPrimaryKeyAttribute() => $entity->getPrimaryKey(),
+            $entity::getHashAttribute() => $entity->getHash(),
         );
 
-        $rangeKeyAttribute = $entity::getRangeKeyAttribute();
+        $rangeKeyAttribute = $entity::getRangeAttribute();
         if ($rangeKeyAttribute !== false) {
-            $attributes[$rangeKeyAttribute] = $entity->getRangeKey();
+            $attributes[$rangeKeyAttribute] = $entity->getRange();
         }
 
         return $this->dynamoDb->formatAttributes($attributes);

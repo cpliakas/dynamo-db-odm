@@ -20,9 +20,12 @@ for more detailed installation and usage instructions.
 
 ## Usage
 
-### Entities
+### Defining Entities
 
-Create objects that model your entities.
+Entities are defined through classes that extend `Cpliakas\DynamoDb\ODM\Entity`.
+Metadata, such as the table name and primary key attributes, are defined in
+static properties and accessed through the static methods defined in
+`Cpliakas\DynamoDb\ODM\EntityInterface`.
 
 ```php
 
@@ -36,20 +39,29 @@ class Book extends Entity
     protected static $table = 'books';
 
     // The attribute containing the primary key
-    protected static $primaryKeyAttribute = 'isbn';
+    protected static $hashAttribute = 'isbn';
 
-    // Optionally set the $rangeKeyAttribute static if appropriate
+    // Optionally set the $rangeAttribute static if appropriate
 
-    /**
-     * Returns the ISBN.
-     *
-     * @return string
-     */
+    // Optionally add attribute setters and getters to taste
+    public function setIsbn($isbn)
+    {
+        $this->setAttribute('isbn', $isbn);
+        return $this;
+    }
+
     public function getIsbn()
     {
-        return $this['isbn'];
+        return $this->setAttribute('isbn');
     }
 }
+
+*NOTE:* Other O*Ms use [annotations](https://github.com/doctrine/annotations)
+to define metadata. This pattern can improve DX for applications with a large
+number of entities and improve performance when proper caching is implemented,
+however this library intentionally chooses to use statics to define metadata
+since it is a lighter-weight solution for the applications this library is
+intended to be used in.
 
 ```
 
@@ -75,12 +87,12 @@ $dm->registerEntityNamesapce('Acme\Entity');
 
 // Instantiate the entity object.
 $book = $dm->entityFactory('Book')
-    ->setPrimaryKey('0-1234-5678-9')
+    ->setHash('0-1234-5678-9')
     ->setAttribute('title', 'The Book Title')
     ->setAttribute('author', 'Chris Pliakas')
 ;
 
-// Entity objects also act like arrays.
+// Entity objects can also act like arrays.
 $book['copyright'] = '2014';
 
 // Save the entity.
@@ -102,4 +114,17 @@ $dm->update($book);
 // Delete the entity.
 $dm->delete($book);
 
+```
+
+### Composite Primary Keys
+
+Pass an array as the primary key parameter when an entity's table uses a hash
+and range primary key type.
+
+```php
+// Assume the "Thread" entity's table uses the hash and range primary key type
+// for the forum name and subject.
+
+// Load the entity from the primary key's hash and range attributes.
+$book = $dm->read('Thread', array('PHP Libraries', 'Using the DynamoDB ODM'));
 ```

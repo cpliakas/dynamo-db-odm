@@ -27,11 +27,11 @@ interface DocumentManagerInterface
 
     /**
      * @param string $entityClass
-     * @param mixed $key
+     * @param mixed $primaryKey
      *
      * @return \Cpliakas\DynamoDb\ODM\EntityInterface|false
      */
-    public function read($entityClass, $key);
+    public function read($entityClass, $primaryKey);
 
     /**
      * @param \Cpliakas\DynamoDb\ODM\EntityInterface $entity
@@ -49,19 +49,19 @@ interface DocumentManagerInterface
 
     /**
      * @param string $entityClass
-     * @param mixed $key
+     * @param mixed $primaryKey
      *
      * @return bool
      */
-    public function deleteByKey($entityClass, $key);
+    public function deleteByKey($entityClass, $primaryKey);
 
     /**
      * @param string $entityClass
-     * @param mixed $key
+     * @param mixed $primaryKey
      *
      * @return bool
      */
-    public function exists($entityClass, $key);
+    public function exists($entityClass, $primaryKey);
 
     /**
      * Executes a query command.
