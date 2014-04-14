@@ -110,7 +110,7 @@ $book = $dm->entityFactory('Book')
 ;
 
 // Entity objects can also act like arrays.
-$book['copyright'] = 2014';
+$book['copyright'] = 2014;
 
 // Save the entity.
 $dm->create($book);
