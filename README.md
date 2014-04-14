@@ -55,6 +55,7 @@ class Book extends Entity
         return $this->setAttribute('isbn');
     }
 }
+```
 
 *NOTE:* Other O*Ms use [annotations](https://github.com/doctrine/annotations)
 to define metadata. This pattern can improve DX for applications with a large
@@ -62,8 +63,6 @@ number of entities and improve performance when proper caching is implemented,
 however this library intentionally chooses to use statics to define metadata
 since it is a lighter-weight solution for the applications this library is
 intended to be used in.
-
-```
 
 ### CRUD operations
 
