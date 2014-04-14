@@ -28,7 +28,7 @@ interface EntityInterface
      *
      * @return string
      */
-    public static function getHashAttribute();
+    public static function getHashKeyAttribute();
 
     /**
      * Returns the attribute containing the primary key's range key, false if
@@ -36,7 +36,7 @@ interface EntityInterface
      *
      * @return string|false
      */
-    public static function getRangeAttribute();
+    public static function getRangeKeyAttribute();
 
     /**
      * Sets the value of the primary key's hash attribute.
@@ -45,14 +45,14 @@ interface EntityInterface
      *
      * @return \Cpliakas\DynamoDb\ODM\EntityInterface
      */
-    public function setHash($hash);
+    public function setHashKey($hash);
 
     /**
      * Returns the value of the primary key's hash attribute.
      *
      * @return string|false
      */
-    public function getHash();
+    public function getHashKey();
 
     /**
      * Sets the value of the primary key's range attribute.
@@ -61,14 +61,14 @@ interface EntityInterface
      *
      * @return \Cpliakas\DynamoDb\ODM\EntityInterface
      */
-    public function setRange($rangeKey);
+    public function setRangeKey($rangeKey);
 
     /**
      * Returns the value of the primary key's range attribute.
      *
      * @return string|false
      */
-    public function getRange();
+    public function getRangeKey();
 
     /**
      * Sets an attribute's value.
@@ -89,6 +89,22 @@ interface EntityInterface
      * @return mixed
      */
     public function getAttribute($attribute);
+
+    /**
+     * Resets all attributes.
+     *
+     * @param array $attributes
+     *
+     * @return \Cpliakas\DynamoDb\ODM\EntityInterface
+     */
+    public function setAttributes(array $attributes);
+
+    /**
+     * Returns an associative array of all attributes.
+     *
+     * @return array
+     */
+    public function getAttributes();
 
     /**
      * Adds an attribute renderer.

@@ -38,10 +38,10 @@ class Book extends Entity
     // The DynanoDB table name
     protected static $table = 'books';
 
-    // The attribute containing the primary key
-    protected static $hashAttribute = 'isbn';
+    // The attribute containing the hash key
+    protected static $hashKeyAttribute = 'isbn';
 
-    // Optionally set the $rangeAttribute static if appropriate
+    // Optionally set the $rangeKeyAttribute static if appropriate
 
     // Optionally add attribute setters and getters to taste
     public function setIsbn($isbn)
@@ -98,7 +98,7 @@ Create an entity.
 // Instantiate the entity object, "Book" is the entity's class name as defined
 // in the "Defining Entities" example above.
 $book = $dm->entityFactory('Book')
-    ->setHash('0-1234-5678-9')
+    ->setHashKey('0-1234-5678-9')
     ->setAttribute('title', 'The Book Title')
     ->setAttribute('author', 'Chris Pliakas')
 ;
@@ -139,7 +139,7 @@ and range primary key type.
 // Assume that the "Thread" entity's table uses the hash and range primary key
 // type containing the forumName and subject attributes.
 
-// Load the entity from the primary key's hash and range attributes.
+// Load the entity from the hash and range keys
 $book = $dm->read('Thread', array('PHP Libraries', 'Using the DynamoDB ODM'));
 ```
 

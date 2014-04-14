@@ -29,12 +29,12 @@ class Entity extends \ArrayObject implements EntityInterface
     /**
      * @var string
      */
-    protected static $hashAttribute;
+    protected static $hashKeyAttribute;
 
     /**
      * @var string
      */
-    protected static $rangeAttribute = false;
+    protected static $rangeKeyAttribute = false;
 
     /**
      * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
@@ -67,51 +67,51 @@ class Entity extends \ArrayObject implements EntityInterface
     /**
      * {@inheritDoc}
      */
-    public static function getHashAttribute()
+    public static function getHashKeyAttribute()
     {
-        return static::$hashAttribute;
+        return static::$hashKeyAttribute;
     }
 
     /**
      * {@inheritDoc}
      */
-    public static function getRangeAttribute()
+    public static function getRangeKeyAttribute()
     {
-        return static::$rangeAttribute;
+        return static::$rangeKeyAttribute;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function setHash($hash)
+    public function setHashKey($hash)
     {
-        $this->setAttribute(static::$hashAttribute, $hash);
+        $this->setAttribute(static::$hashKeyAttribute, $hash);
         return $this;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getHash()
+    public function getHashKey()
     {
-        return $this->getAttribute(static::$hashAttribute);
+        return $this->getAttribute(static::$hashKeyAttribute);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function setRange($range)
+    public function setRangeKey($range)
     {
-        $this->setAttribute(static::$rangeAttribute, $range);
+        $this->setAttribute(static::$rangeKeyAttribute, $range);
         return $this;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getRange()
+    public function getRangeKey()
     {
-        return $this->getAttribute(static::$rangeAttribute);
+        return $this->getAttribute(static::$rangeKeyAttribute);
     }
 
     /**
@@ -149,6 +149,25 @@ class Entity extends \ArrayObject implements EntityInterface
     public function getAttribute($attribute)
     {
         return $this->offsetGet($attribute);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return \Cpliakas\DynamoDb\ODM\Entity
+     */
+    public function setAttributes(array $attributes)
+    {
+        $this->exchangeArray($attributes);
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getAttributes()
+    {
+        return $this->getArrayCopy();
     }
 
     /**

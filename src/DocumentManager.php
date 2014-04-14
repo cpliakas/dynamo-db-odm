@@ -3,6 +3,7 @@
 namespace Cpliakas\DynamoDb\ODM;
 
 use Aws\DynamoDb\DynamoDbClient;
+use Aws\DynamoDb\Model\Attribute;
 use Guzzle\Service\Resource\Model;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -411,12 +412,12 @@ class DocumentManager implements DocumentManagerInterface
         $primaryKey = (array) $primaryKey;
 
         if (!isset($primaryKey[0])) {
-            throw new \InvalidArgumentException('Primary key\'s hash attribute is required');
+            throw new \InvalidArgumentException('Hash key is required');
         }
 
-        $entity = $this->entityFactory($entityClass)->setHash($primaryKey[0]);
+        $entity = $this->entityFactory($entityClass)->setHashKey($primaryKey[0]);
         if (isset($primaryKey[1])) {
-            $entity->setRange($primaryKey[1]);
+            $entity->setRangeKey($primaryKey[1]);
         }
 
         return $entity;
@@ -430,12 +431,12 @@ class DocumentManager implements DocumentManagerInterface
     protected function renderKeyCondition(EntityInterface $entity)
     {
         $attributes = array(
-            $entity::getHashAttribute() => $entity->getHash(),
+            $entity::getHashKeyAttribute() => $entity->getHashKey(),
         );
 
-        $rangeKeyAttribute = $entity::getRangeAttribute();
+        $rangeKeyAttribute = $entity::getRangeKeyAttribute();
         if ($rangeKeyAttribute !== false) {
-            $attributes[$rangeKeyAttribute] = $entity->getRange();
+            $attributes[$rangeKeyAttribute] = $entity->getRangeKey();
         }
 
         return $this->dynamoDb->formatAttributes($attributes);
@@ -522,14 +523,8 @@ class DocumentManager implements DocumentManagerInterface
      */
     protected function populateEntity(EntityInterface $entity, array $item)
     {
-        if ($entity instanceof \ArrayObject) {
-            $entity->exchangeArray($this->flattenArray($item));
-        } else {
-            $flattened = $this->flattenArray($item);
-            foreach ($flattened as $attribute => $value) {
-                $entity->setAttribute($attribute, $value);
-            }
-        }
+        $attributes = $this->flattenArray($item);
+        $entity->setAttributes($item);
     }
 
     /**
