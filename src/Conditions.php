@@ -17,6 +17,14 @@ class Conditions implements ConditionsInterface
     protected $options = array();
 
     /**
+     * @return \Cpliakas\DynamoDb\ODM\Conditions
+     */
+    public static function factory()
+    {
+        return new static();
+    }
+
+    /**
      * {@inheritDoc}
      *
      * @return \Cpliakas\DynamoDb\ODM\Conditions

@@ -104,7 +104,7 @@ $book = $dm->entityFactory('Book')
 ;
 
 // Entity objects can also act like arrays.
-$book['copyright'] = '2014';
+$book['copyright'] = 2014';
 
 // Save the entity.
 $dm->create($book);
@@ -141,4 +141,20 @@ and range primary key type.
 
 // Load the entity from the primary key's hash and range attributes.
 $book = $dm->read('Thread', array('PHP Libraries', 'Using the DynamoDB ODM'));
+```
+
+### Scan and Query
+
+```php
+
+use Aws\DynamoDb\Enum\ComparisonOperator;
+
+// Search for books published after 2010 that don't have the title "Do not read me"
+$conditions = Conditions::factory()
+    ->addCondition('title', 'Do not read me', ComparisonOperator::NE)
+    ->addCondition('copyright', 2010, ComparisonOperator::GT)
+;
+
+$result = $dm->scan('Book', $conditions);
+
 ```
