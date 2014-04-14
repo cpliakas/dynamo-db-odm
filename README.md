@@ -64,9 +64,10 @@ however this library intentionally chooses to use statics to define metadata
 since it is a lighter-weight solution for the applications this library is
 intended to be used in.
 
-### CRUD operations
+### Initializing The Document Manager
 
-Instantiate the Document manager and create an entity.
+The document manager is responsible to instantiating entity classes and reading
+/ writing records to DynamoDB.
 
 ```php
 
@@ -82,9 +83,19 @@ $dynamoDb = DynamoDbClient::factory(array(
 ));
 
 $dm = new DocumentManager($dynamoDb);
+
+// Register one or more namespaces that contain entities in order to avoid
+// having to pass the fully qualified class names as arguments.
 $dm->registerEntityNamesapce('Acme\Entity');
 
-// Instantiate the entity object.
+```
+
+### CRUD operations
+
+Create an entity.
+
+```php
+// Instantiate the entity object, "Book" is the entity's class name.
 $book = $dm->entityFactory('Book')
     ->setHash('0-1234-5678-9')
     ->setAttribute('title', 'The Book Title')
@@ -96,14 +107,13 @@ $book['copyright'] = '2014';
 
 // Save the entity.
 $dm->create($book);
-
 ```
 
-Load, modify, and delete the entity.
+Read, update, and delete the entity.
 
 ```php
 
-// Load the entity.
+// Read the entity.
 $book = $dm->read('Book', '0-1234-5678-9');
 
 // Update the entity.
@@ -115,14 +125,18 @@ $dm->delete($book);
 
 ```
 
+*NOTE:* Other O*Ms use the [unit of work pattern](http://robrich.org/archive/2012/04/18/design-patterns-for-data-persistence-unit-of-work-pattern-and.aspx)
+when persisting data to the backend. Due to the nature of DynamoDB and the
+desire to keep this library light-weight, we opted not to use this pattern.
+
 ### Composite Primary Keys
 
 Pass an array as the primary key parameter when an entity's table uses a hash
 and range primary key type.
 
 ```php
-// Assume the "Thread" entity's table uses the hash and range primary key type
-// for the forum name and subject.
+// Assume that the "Thread" entity's table uses the hash and range primary key
+// type containing the forumName and subject attributes.
 
 // Load the entity from the primary key's hash and range attributes.
 $book = $dm->read('Thread', array('PHP Libraries', 'Using the DynamoDB ODM'));
