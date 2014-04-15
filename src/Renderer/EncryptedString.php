@@ -28,9 +28,9 @@ class EncryptedString implements AttributeRendererInterface
     {
         $cipherText = $event->getValue();
 
-        // The Amazon SDK encodes the binary string to base64 before it sends
-        // data to DynamoDB, but it does not decode it. Therefore we have to
-        // check wheter it is encoded or not.
+        // The Amazon SDK base64 encodes binary strings before it sends data to
+        // DynamoDB, but it does not base64 decode it after it retrieves the
+        // data from DynamoDB. Therefore we have to check wheter it is encoded.
         if (preg_match('@^[a-zA-Z0-9+/]+={0,2}$@', $cipherText)) {
             $cipherText = base64_decode($cipherText);
             if (false === $cipherText) {
