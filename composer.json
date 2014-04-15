@@ -29,7 +29,8 @@
     },
     "suggest": {
         "ircmaxell/password-compat": "Enables the password transformer for PHP <=5.4",
-        "phpseclib/phpseclib": "Enables the encrypted string transformer and renderer"
+        "phpseclib/phpseclib": "Enables the encrypted string transformer and renderer",
+        "symfony/security": "Enables the random string transformer"
     },
     "autoload": {
         "psr-4": {
