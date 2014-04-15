@@ -4,7 +4,7 @@ namespace Cpliakas\DynamoDb\ODM\Transformer;
 
 use Cpliakas\DynamoDb\ODM\Event\AttributeEvent;
 
-class Password implements TransformerInterface
+class Password implements AttributeTransformerInterface
 {
     /**
      * @var string

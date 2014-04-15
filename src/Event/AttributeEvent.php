@@ -15,7 +15,7 @@ class AttributeEvent extends Event
     /**
      * @var string
      */
-    protected $index;
+    protected $attribute;
 
     /**
      * @var mixed
@@ -24,14 +24,14 @@ class AttributeEvent extends Event
 
     /**
      * @param \Cpliakas\DynamoDb\ODM\Entity $entity
-     * @param string $index
+     * @param string $attribute
      * @param mixed $value
      */
-    public function __construct(Entity $entity, $index, $value)
+    public function __construct(Entity $entity, $attribute, $value)
     {
-        $this->entity = $entity;
-        $this->index  = $index;
-        $this->value  = $value;
+        $this->entity    = $entity;
+        $this->attribute = $attribute;
+        $this->value     = $value;
     }
 
     /**
@@ -45,9 +45,9 @@ class AttributeEvent extends Event
     /**
      * @return string
      */
-    public function getIndex()
+    public function getAttribute()
     {
-        return $this->index;
+        return $this->attribute;
     }
 
     /**

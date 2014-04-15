@@ -28,7 +28,8 @@
         "sebastian/phpcpd": "~2.0"
     },
     "suggest": {
-        "ircmaxell/password-compat": "Enables the password transformer for PHP <=5.4"
+        "ircmaxell/password-compat": "Enables the password transformer for PHP <=5.4",
+        "phpseclib/phpseclib": "Enables the encrypted string transformer and renderer"
     },
     "autoload": {
         "psr-4": {
