@@ -43,7 +43,7 @@ static methods defined in `Cpliakas\DynamoDb\ODM\EntityInterface`.
 namespace Acme\Entity
 
 use Aws\DynamoDb\Enum\Type;
-use Cpliakas\DynamoDb\ODM\Entity
+use Cpliakas\DynamoDb\ODM\Entity;
 
 class Book extends Entity
 {
@@ -130,7 +130,7 @@ $book['copyright'] = 2014;
 $dm->create($book);
 ```
 
-Read, update, and delete the entity.
+Read, update, and delete the document.
 
 ```php
 
@@ -176,5 +176,57 @@ $conditions = Conditions::factory()
 ;
 
 $result = $dm->scan('Book', $conditions);
+
+```
+
+### Renderers
+
+Renderers convert the value stored in the database to a normalized value or
+something that is native to PHP. For example, if you store a date string or Unix
+timestamp in the `created` attribute, you can use a render to automatically
+convert it to a `\DateTime` object.
+
+Building on the Book entity above, override the constructor and add the date
+renderer to the `created` attribute.
+
+```php
+
+namespace Acme\Entity
+
+use Cpliakas\DynamoDb\ODM\Entity;
+use Cpliakas\DynamoDb\ODM\Renderer as Renderer;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+
+class Book extends Entity
+{
+    // Set statics here ...
+
+    public function __construct(EventDispatcherInterface $dispatcher, $data = array())
+    {
+        parent::__construct($dispatcher, $data);
+        $this->addRenderer('created', new Renderer\Date());
+    }
+}
+
+```
+
+Set a Unix timestamp as the `created` attribute and create the document.
+
+```php
+$book = $dm->entityFactory('Book', array(
+    'isbn'    => '0-1234-5678-9',
+    'created' => time(),
+));
+
+$dm->create($book);
+```
+
+Read the document from DynamoDB, accessing the `created` attribute will return
+a `\DateTime` object.
+
+```php
+$book = $dm->read('Book', '0-1234-5678-9');
+
+echo $book['created']->format(\DateTime::ATOM);
 
 ```
