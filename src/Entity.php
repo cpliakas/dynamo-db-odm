@@ -147,7 +147,7 @@ class Entity extends \ArrayObject implements EntityInterface
      */
     public function addRenderer($attribute, Renderer\AttributeRendererInterface $renderer)
     {
-        $eventName = 'cpliakas.dynamo_db.' . $this->classIdentifier . '.' . $attribute . '.render';
+        $eventName = 'dynamo_db.' . $this->classIdentifier . '.' . $attribute . '.render';
         $this->dispatcher->addListener($eventName, array($renderer, 'render'));
         return $this;
     }
@@ -157,7 +157,7 @@ class Entity extends \ArrayObject implements EntityInterface
      */
     public function addTransformer($attribute, Transformer\AttributeTransformerInterface $transformer)
     {
-        $eventName = 'cpliakas.dynamo_db.' . $this->classIdentifier . '.' . $attribute . '.transform';
+        $eventName = 'dynamo_db.' . $this->classIdentifier . '.' . $attribute . '.transform';
         $this->dispatcher->addListener($eventName, array($transformer, 'transform'));
         return $this;
     }
@@ -203,7 +203,7 @@ class Entity extends \ArrayObject implements EntityInterface
      */
     public function offsetSet($index, $value)
     {
-        $eventName = 'cpliakas.dynamo_db.' . $this->classIdentifier . '.' . $index . '.transform';
+        $eventName = 'dynamo_db.' . $this->classIdentifier . '.' . $index . '.transform';
         $event = new Event\AttributeEvent($this, $index, $value);
         $this->dispatcher->dispatch($eventName, $event);
 
@@ -218,7 +218,7 @@ class Entity extends \ArrayObject implements EntityInterface
         if (!isset($this->renderCache[$index])) {
             $value = parent::offsetGet($index);
 
-            $eventName = 'cpliakas.dynamo_db.' . $this->classIdentifier . '.' . $index . '.render';
+            $eventName = 'dynamo_db.' . $this->classIdentifier . '.' . $index . '.render';
             $event = new Event\AttributeEvent($this, $index, $value);
             $this->dispatcher->dispatch($eventName, $event);
 
