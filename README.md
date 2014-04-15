@@ -1,6 +1,17 @@
 # DynamoDB ODM
 
-A light-weight, no-frills ODM (Object Document Mapper) for DynamoDB.
+A lightweight, no-frills ODM (Object Document Mapper) for DynamoDB.
+
+### Why?
+
+Amazon provides an SDK that connects to DynamoDB. Why would I want to use an ODM
+on top of it?
+
+* Allows developers to define their data model via the codebases
+* Provides an Object-Oriented wrapper around complex data structures
+* Facilitates terse, more readable code
+* Adds logical extension points via [Symfony's EventDispatcher component](http://symfony.com/doc/current/components/event_dispatcher/introduction.html)
+
 
 ## Installation
 
@@ -134,7 +145,7 @@ $dm->delete($book);
 
 *NOTE:* Other ODMs use the [unit of work pattern](http://robrich.org/archive/2012/04/18/design-patterns-for-data-persistence-unit-of-work-pattern-and.aspx)
 when persisting data to the backend. Due to the nature of DynamoDB and the
-desire to keep this library light-weight, we opted not to use this pattern.
+desire to keep this library lightweight, we opted not to use this pattern.
 
 ### Composite Primary Keys
 
