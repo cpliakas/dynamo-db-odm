@@ -8,8 +8,8 @@ Amazon provides an SDK that connects to DynamoDB. Why would you want to use an
 ODM on top of it?
 
 * Allows developers to define their data model in the codebase
-* Facilitates readable code by wrapping an OO API around complex data structures
-* Adds logical extension points with [Symfony's EventDispatcher component](http://symfony.com/doc/current/components/event_dispatcher/introduction.html)
+* Facilitates readable code by wrapping complex data structures with an OO API
+* Adds logical extension points via [Symfony's EventDispatcher component](http://symfony.com/doc/current/components/event_dispatcher/introduction.html)
 * Optionally enforces [entity integrity](http://en.wikipedia.org/wiki/Entity_integrity)
 * Facilitates password hashing, data encryption, random string generation, etc.
 
@@ -33,8 +33,8 @@ for more detailed installation and usage instructions.
 
 ### Defining Entities
 
-Entities are types of documents that are defined in classes that extend
-`Cpliakas\DynamoDb\ODM\Entity`. Metadata, such as the table name and hash /
+Entities are classes that extend `Cpliakas\DynamoDb\ODM\Entity` and model
+different types of documents. Metadata, such as the table name and hash /
 range key attributes, are defined in static properties and accessed through the
 static methods defined in `Cpliakas\DynamoDb\ODM\EntityInterface`.
 
@@ -224,7 +224,7 @@ $book = $dm->entityFactory('Book', array(
 $dm->create($book);
 ```
 
-Read the document from DynamoDB, accessing the `created` attribute will return
+Read the document from DynamoDB. Accessing the `created` attribute will return
 a `\DateTime` object.
 
 ```php
