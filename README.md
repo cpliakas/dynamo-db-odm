@@ -40,7 +40,7 @@ static methods defined in `Cpliakas\DynamoDb\ODM\EntityInterface`.
 
 ```php
 
-namespace Acme\Entity
+namespace Acme\Entity;
 
 use Aws\DynamoDb\Enum\Type;
 use Cpliakas\DynamoDb\ODM\Entity;
@@ -163,7 +163,11 @@ and range primary key type.
 $book = $dm->read('Thread', array('PHP Libraries', 'Using the DynamoDB ODM'));
 ```
 
-### Scan and Query
+### Query and Scan Commands
+
+You can either pass the raw data structure defined by the AWS SDK for PHP as the
+second parameter or use the object oriented wrapper to build the search
+conditions. The example below uses the OO wrapper.
 
 ```php
 
@@ -179,19 +183,18 @@ $result = $dm->scan('Book', $conditions);
 
 ```
 
-### Renderers
+### Attribute Renderers
 
-Renderers convert the value stored in the database to a normalized value or
-something that is native to PHP. For example, if you store a date string or Unix
-timestamp in the `created` attribute, you can use a render to automatically
-convert it to a `\DateTime` object.
+Renderers convert the value stored in the database to something that is
+normalized or native to PHP.
 
-Building on the Book entity above, override the constructor and add the date
-renderer to the `created` attribute.
+The following example builds upon the book entity above to use a renderer that
+converts a Unix timestamp stored in the `created` attribute to a `\DateTime`
+object when it is accessed.
 
 ```php
 
-namespace Acme\Entity
+namespace Acme\Entity;
 
 use Cpliakas\DynamoDb\ODM\Entity;
 use Cpliakas\DynamoDb\ODM\Renderer as Renderer;
