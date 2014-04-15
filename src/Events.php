@@ -65,26 +65,6 @@ final class Events
     const ENTITY_POST_UPDATE = 'dynamo_db.entity.post_update';
 
     /**
-     * This event is thrown prior to an entity being created or updated.
-     *
-     * The event listener receives an \Cpliakas\DynamoDb\ODM\Event\EntityRequestEvent
-     * instance.
-     *
-     * @var string
-     */
-    const ENTITY_PRE_SAVE = 'dynamo_db.entity.pre_save';
-
-    /**
-     * This event is thrown after an entity has been created or updated.
-     *
-     * The event listener receives an \Cpliakas\DynamoDb\ODM\Event\EntityResponseEvent
-     * instance.
-     *
-     * @var string
-     */
-    const ENTITY_POST_SAVE = 'dynamo_db.entity.post_save';
-
-    /**
      * This event is thrown prior to an entity being deleted.
      *
      * The event listener receives an \Cpliakas\DynamoDb\ODM\Event\EntityRequestEvent

@@ -96,7 +96,10 @@ class DocumentManager implements DocumentManagerInterface
     public function create(EntityInterface $entity)
     {
         $this->dispatchEntityRequestEvent(Events::ENTITY_PRE_CREATE, $entity);
-        $model = $this->save($entity);
+
+        $commandOptions = $this->formatPutItemCommandOptions($entity, false);
+        $model = $this->dynamoDb->putItem($commandOptions);
+
         $this->dispatchEntityResponseEvent(Events::ENTITY_POST_CREATE, $entity, $model);
         return true;
     }
@@ -106,7 +109,7 @@ class DocumentManager implements DocumentManagerInterface
      *
      * @throws \Aws\DynamoDb\Exception\DynamoDBException
      *
-     * @see http://docs.aws.amazon.com/aws-sdk-php/guide/latest/service-dynamodb.html#retrieving-items
+     * @see http://docs.aws.amazon.com/aws-sdk-php/latest/class-Aws.DynamoDb.DynamoDbClient.html#_getItem
      */
     public function read($entityClass, $primaryKey)
     {
@@ -139,7 +142,10 @@ class DocumentManager implements DocumentManagerInterface
     public function update(EntityInterface $entity)
     {
         $this->dispatchEntityRequestEvent(Events::ENTITY_PRE_UPDATE, $entity);
-        $model = $this->save($entity);
+
+        $commandOptions = $this->formatPutItemCommandOptions($entity, true);
+        $model = $this->dynamoDb->putItem($commandOptions);
+
         $this->dispatchEntityResponseEvent(Events::ENTITY_POST_UPDATE, $entity, $model);
         return true;
     }
@@ -197,10 +203,10 @@ class DocumentManager implements DocumentManagerInterface
     /**
      * {@inheritDoc}
      *
-     * @see http://docs.aws.amazon.com/aws-sdk-php/guide/latest/service-dynamodb.html#query
-     *
      * @throws \InvalidArgumentException
      * @throws \Aws\DynamoDb\Exception\DynamoDBException
+     *
+     * @see http://docs.aws.amazon.com/aws-sdk-php/latest/class-Aws.DynamoDb.DynamoDbClient.html#_query
      */
     public function query($entityClass, $commandOptions)
     {
@@ -210,10 +216,10 @@ class DocumentManager implements DocumentManagerInterface
     /**
      * {@inheritDoc}
      *
-     * @see http://docs.aws.amazon.com/aws-sdk-php/guide/latest/service-dynamodb.html#scan
-     *
      * @throws \InvalidArgumentException
      * @throws \Aws\DynamoDb\Exception\DynamoDBException
+     *
+     * @see http://docs.aws.amazon.com/aws-sdk-php/latest/class-Aws.DynamoDb.DynamoDbClient.html#_scan
      */
     public function scan($entityClass, $commandOptions)
     {
@@ -221,17 +227,24 @@ class DocumentManager implements DocumentManagerInterface
     }
 
     /**
+     * Returns baseline options for putItem commands.
+     *
      * @param \Cpliakas\DynamoDb\ODM\EntityInterface $entity
+     * @param bool $exists
      *
-     * @return \Guzzle\Service\Resource\Model
-     *
-     * @see http://docs.aws.amazon.com/aws-sdk-php/guide/latest/service-dynamodb.html#adding-items
+     * @return array
      *
      * @throws \Aws\DynamoDb\Exception\DynamoDBException
+     *
+     * @see http://docs.aws.amazon.com/aws-sdk-php/latest/class-Aws.DynamoDb.DynamoDbClient.html#_putItem
      */
-    public function save(EntityInterface $entity)
+    protected function formatPutItemCommandOptions(EntityInterface $entity, $mustExist)
     {
-        $this->dispatchEntityRequestEvent(Events::ENTITY_PRE_SAVE, $entity);
+        $attributes = array($entity::getHashKeyAttribute() => $entity->getHashKey());
+        $rangeKeyAttribute = $entity::getRangeKeyAttribute();
+        if ($rangeKeyAttribute) {
+            $attributes[$rangeKeyAttribute] = $entity->getRangeKey();
+        }
 
         $commandOptions = array(
             'TableName'              => $this->getEntityTable($entity),
@@ -239,10 +252,19 @@ class DocumentManager implements DocumentManagerInterface
             'ReturnConsumedCapacity' => $this->returnConsumedCapacity,
         );
 
-        $model = $this->dynamoDb->putItem($commandOptions);
+        // Adds conditions based on whether items is being added or updated.
+        if ($entity::enforceEntityIntegrity()) {
+            if ($mustExist) {
+                $entityClass = get_class($entity);
+                $commandOptions['Expected'] = $this->formatAttributes($entityClass, $attributes, Attribute::FORMAT_EXPECTED);
+            } else {
+                foreach ($attributes as $attribute => $value) {
+                    $commandOptions['Expected'][$attribute] = array('Exists' => false);
+                }
+            }
+        }
 
-        $this->dispatchEntityRequestEvent(Events::ENTITY_POST_SAVE, $entity);
-        return $model;
+        return $commandOptions;
     }
 
     /**

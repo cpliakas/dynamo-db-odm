@@ -48,6 +48,13 @@ interface EntityInterface
     public static function getDataTypeMappings();
 
     /**
+     * Whether to enforce entity integrity.
+     *
+     * @return bool
+     */
+    public static function enforceEntityIntegrity();
+
+    /**
      * Sets the value of the primary key's hash attribute.
      *
      * @param mixed $hash

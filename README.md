@@ -11,7 +11,7 @@ on top of it?
 * Provides an Object-Oriented wrapper around complex data structures
 * Facilitates terse, more readable code
 * Adds logical extension points via [Symfony's EventDispatcher component](http://symfony.com/doc/current/components/event_dispatcher/introduction.html)
-
+* Optionally enforces [entity integrity](http://en.wikipedia.org/wiki/Entity_integrity)
 
 ## Installation
 
@@ -54,6 +54,9 @@ class Book extends Entity
     protected static $hashKeyAttribute = 'isbn';
 
     // Optionally set the $rangeKeyAttribute static if appropriate
+
+    // Optionally enforce entity integrity
+    protected static $enforceEntityIntegrity = true;
 
     // Optionally map attributes to data types
     protected static $dataTypeMappings = array(

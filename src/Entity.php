@@ -42,6 +42,11 @@ class Entity extends \ArrayObject implements EntityInterface
     protected static $dataTypeMappings = array();
 
     /**
+     * @var bool
+     */
+    protected static $enforceEntityIntegrity = false;
+
+    /**
      * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
      * @param array $data
      */
@@ -91,6 +96,16 @@ class Entity extends \ArrayObject implements EntityInterface
     public static function getDataTypeMappings()
     {
         return static::$dataTypeMappings;
+    }
+
+    /**
+     * Whether to enforce entity integrity.
+     *
+     * @return bool
+     */
+    public static function enforceEntityIntegrity()
+    {
+        return static::$enforceEntityIntegrity;
     }
 
     /**
