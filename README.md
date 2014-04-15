@@ -12,6 +12,8 @@ on top of it?
 * Facilitates terse, more readable code
 * Adds logical extension points via [Symfony's EventDispatcher component](http://symfony.com/doc/current/components/event_dispatcher/introduction.html)
 * Optionally enforces [entity integrity](http://en.wikipedia.org/wiki/Entity_integrity)
+* Provides helper methods that automatically hash passwords, encrypt / decrypt
+  strings, generate random strings, etc.
 
 ## Installation
 
