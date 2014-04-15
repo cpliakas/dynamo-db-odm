@@ -2,6 +2,7 @@
 
 namespace Cpliakas\DynamoDb\ODM;
 
+use Aws\Common\Iterator\AwsResourceIterator;
 use Aws\DynamoDb\DynamoDbClient;
 use Aws\DynamoDb\Model\Attribute;
 use Guzzle\Service\Resource\Model;
@@ -210,7 +211,7 @@ class DocumentManager implements DocumentManagerInterface
      */
     public function query($entityClass, $commandOptions)
     {
-        return $this->executeCommand($entityClass, $commandOptions, 'Query', 'KeyConditions');
+        return $this->executeSearchCommand($entityClass, $commandOptions, 'Query', 'KeyConditions');
     }
 
     /**
@@ -223,7 +224,7 @@ class DocumentManager implements DocumentManagerInterface
      */
     public function scan($entityClass, $commandOptions)
     {
-        return $this->executeCommand($entityClass, $commandOptions, 'Scan', 'ScanFilter');
+        return $this->executeSearchCommand($entityClass, $commandOptions, 'Scan', 'ScanFilter');
     }
 
     /**
@@ -546,7 +547,7 @@ class DocumentManager implements DocumentManagerInterface
      * @throws \InvalidArgumentException
      * @throws \Aws\DynamoDb\Exception\DynamoDBException
      */
-    protected function executeCommand($entityClass, $commandOptions, $command, $optionKey)
+    protected function executeSearchCommand($entityClass, $commandOptions, $command, $optionKey)
     {
         if ($commandOptions instanceof ConditionsInterface) {
             $commandOptions = array(
@@ -562,14 +563,18 @@ class DocumentManager implements DocumentManagerInterface
             'ReturnConsumedCapacity' => $this->returnConsumedCapacity,
         );
 
+        $command = strtolower($command);
+        $eventNamePrefix = 'dynamo_db.search.';
+
+        $this->dispatchSearchRequestEvent($eventNamePrefix . 'pre_' . $command, $entityClass);
         $iterator = $this->dynamoDb->getIterator($command, $commandOptions);
+        $this->dispatchSearchResponseEvent($eventNamePrefix . 'post_' . $command, $entityClass, $iterator);
 
         $entities = array();
         foreach ($iterator as $item) {
             $data = array();
             foreach ($item as $attribute => $value) {
-                $rawValue = current($value);
-                $data[$attribute] = (key($value) != 'N') ? (string) $rawValue : (int) $rawValue;
+                $data[$attribute] = current($value);
             }
             $entities[] = $this->entityFactory($entityClass, $data);
         }
@@ -619,6 +624,27 @@ class DocumentManager implements DocumentManagerInterface
     protected function dispatchEntityResponseEvent($eventName, Entity $entity, Model $model)
     {
         $event = new Event\EntityResponseEvent($entity, $model);
+        $this->dispatcher->dispatch($eventName, $event);
+    }
+
+    /**
+     * @param string $eventName
+     * @param string $entityClass
+     */
+    protected function dispatchSearchRequestEvent($eventName, $entityClass)
+    {
+        $event = new Event\SearchRequestEvent($entityClass);
+        $this->dispatcher->dispatch($eventName, $event);
+    }
+
+    /**
+     * @param string $eventName
+     * @param string $entityClass
+     * @param Aws\Common\Iterator\AwsResourceIterator $iterator
+     */
+    protected function dispatchSearchResponseEvent($eventName, $entityClass, AwsResourceIterator $iterator)
+    {
+        $event = new Event\SearchResponseEvent($entityClass, $iterator);
         $this->dispatcher->dispatch($eventName, $event);
     }
 }

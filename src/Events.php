@@ -83,4 +83,44 @@ final class Events
      * @var string
      */
     const ENTITY_POST_DELETE = 'dynamo_db.entity.post_delete';
+
+    /**
+     * This event is thrown prior to a query command being executed.
+     *
+     * The event listener receives an \Cpliakas\DynamoDb\ODM\Event\SearchRequestEvent
+     * instance.
+     *
+     * @var string
+     */
+    const ENTITY_PRE_QUERY = 'dynamo_db.search.pre_query';
+
+    /**
+     * This event is thrown after a query command has been executed.
+     *
+     * The event listener receives an \Cpliakas\DynamoDb\ODM\Event\SearchResponseEvent
+     * instance.
+     *
+     * @var string
+     */
+    const ENTITY_POST_QUERY = 'dynamo_db.search.post_query';
+
+    /**
+     * This event is thrown prior to a scan command being executed.
+     *
+     * The event listener receives an \Cpliakas\DynamoDb\ODM\Event\SearchRequestEvent
+     * instance.
+     *
+     * @var string
+     */
+    const ENTITY_PRE_SCAN = 'dynamo_db.search.pre_scan';
+
+    /**
+     * This event is thrown after a scan command has been executed.
+     *
+     * The event listener receives an \Cpliakas\DynamoDb\ODM\Event\SearchResponseEvent
+     * instance.
+     *
+     * @var string
+     */
+    const ENTITY_POST_SCAN = 'dynamo_db.search.post_scan';
 }
