@@ -1,6 +1,6 @@
 # DynamoDB ODM
 
-A light-weight, no-frills ODM for DynamoDB.
+A light-weight, no-frills ODM (Object Document Mapper) for DynamoDB.
 
 ## Installation
 
@@ -22,10 +22,10 @@ for more detailed installation and usage instructions.
 
 ### Defining Entities
 
-Entities are defined through classes that extend `Cpliakas\DynamoDb\ODM\Entity`.
-Metadata, such as the table name and primary key attributes, are defined in
-static properties and accessed through the static methods defined in
-`Cpliakas\DynamoDb\ODM\EntityInterface`.
+Entities are types of documents that are defined in classes that extend
+`Cpliakas\DynamoDb\ODM\Entity`. Metadata, such as the table name and hash /
+range key attributes, are defined in static properties and accessed through the
+static methods defined in `Cpliakas\DynamoDb\ODM\EntityInterface`.
 
 ```php
 
@@ -65,15 +65,15 @@ class Book extends Entity
 
 *NOTE:* Other ODMs use [annotations](https://github.com/doctrine/annotations)
 to define metadata. This pattern can improve DX for applications with a large
-number of entities and improve performance when proper caching is implemented,
-however this library intentionally chooses to use statics to define metadata
-since it is a lighter-weight solution for the applications this library is
+number of entities and improve performance when proper caching is implemented.
+However, this library intentionally chooses to use statics to define metadata
+since it is a lighter-weight solution for the applications this project is
 intended to be used in.
 
 ### Initializing The Document Manager
 
-The document manager is responsible to instantiating entity classes and reading
-/ writing records to DynamoDB.
+The document manager is responsible for instantiating entity classes and reading
+/ writing documents to DynamoDB.
 
 ```php
 
@@ -98,21 +98,21 @@ $dm->registerEntityNamesapce('Acme\Entity');
 
 ### CRUD Operations
 
-Create an entity.
+Create a document.
 
 ```php
-// Instantiate the entity object, "Book" is the entity's class name as defined
-// in the "Defining Entities" example above.
+// Instantiate the entity object to model the new document. "Book" is the
+// entity's class name as defined in the "Defining Entities" example above.
 $book = $dm->entityFactory('Book')
     ->setHashKey('0-1234-5678-9')
     ->setAttribute('title', 'The Book Title')
     ->setAttribute('author', 'Chris Pliakas')
 ;
 
-// Entity objects can also act like arrays.
+// Documents can also act like arrays
 $book['copyright'] = 2014;
 
-// Save the entity.
+// Save the document
 $dm->create($book);
 ```
 
@@ -120,14 +120,14 @@ Read, update, and delete the entity.
 
 ```php
 
-// Read the entity.
+// Read the document
 $book = $dm->read('Book', '0-1234-5678-9');
 
-// Update the entity.
+// Update the document
 $book['title'] = 'Revised title';
 $dm->update($book);
 
-// Delete the entity.
+// Delete the document
 $dm->delete($book);
 
 ```
@@ -145,7 +145,7 @@ and range primary key type.
 // Assume that the "Thread" entity's table uses the hash and range primary key
 // type containing the forumName and subject attributes.
 
-// Load the entity from the hash and range keys
+// Load the document by the hash and range keys
 $book = $dm->read('Thread', array('PHP Libraries', 'Using the DynamoDB ODM'));
 ```
 
