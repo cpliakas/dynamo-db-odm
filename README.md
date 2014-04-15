@@ -4,13 +4,12 @@ A lightweight, no-frills ODM (Object Document Mapper) for DynamoDB.
 
 ### Why?
 
-Amazon provides an SDK that connects to DynamoDB. Why would I want to use an ODM
-on top of it?
+Amazon provides an SDK that connects to DynamoDB. Why would you want to use an
+ODM on top of it?
 
 * Allows developers to define their data model in the codebase
-* Provides an Object-Oriented wrapper around complex data structures
-* Facilitates terse, more readable code
-* Adds logical extension points via [Symfony's EventDispatcher component](http://symfony.com/doc/current/components/event_dispatcher/introduction.html)
+* Facilitates readable code by wrapping an OO API around complex data structures
+* Adds logical extension points with [Symfony's EventDispatcher component](http://symfony.com/doc/current/components/event_dispatcher/introduction.html)
 * Optionally enforces [entity integrity](http://en.wikipedia.org/wiki/Entity_integrity)
 * Facilitates password hashing, data encryption, random string generation, etc.
 

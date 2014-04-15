@@ -227,23 +227,4 @@ class Entity extends \ArrayObject implements EntityInterface
 
         return $this->renderCache[$index];
     }
-
-    /**
-     * Access attributes as methods.
-     *
-     * @throws \BadMethodCallException
-     */
-    public function __call($name, $arguments)
-    {
-        if (isset($this[$name])) {
-            if (!isset($arguments[0])) {
-                return $this[$name];
-            } else {
-                $this[$name] = $arguments[0];
-            }
-        } else {
-            $message = 'Call to undefined method ' . get_class($this) . '::' . $name . '()';
-            throw new \BadMethodCallException($message);
-        }
-    }
 }
