@@ -93,11 +93,11 @@ class DocumentManager implements DocumentManagerInterface
      *
      * @throws \Aws\DynamoDb\Exception\DynamoDBException
      */
-    public function create(EntityInterface $entity)
+    public function create(EntityInterface $entity, array $commandOptions = array())
     {
         $this->dispatchEntityRequestEvent(Events::ENTITY_PRE_CREATE, $entity);
 
-        $commandOptions = $this->formatPutItemCommandOptions($entity, false);
+        $commandOptions += $this->formatPutItemCommandOptions($entity, false);
         $model = $this->dynamoDb->putItem($commandOptions);
 
         $this->dispatchEntityResponseEvent(Events::ENTITY_POST_CREATE, $entity, $model);
@@ -111,19 +111,19 @@ class DocumentManager implements DocumentManagerInterface
      *
      * @see http://docs.aws.amazon.com/aws-sdk-php/latest/class-Aws.DynamoDb.DynamoDbClient.html#_getItem
      */
-    public function read($entityClass, $primaryKey)
+    public function read($entityClass, $primaryKey, array $commandOptions = array())
     {
         $entity = $this->initEntity($entityClass, $primaryKey);
         $this->dispatchEntityRequestEvent(Events::ENTITY_PRE_READ, $entity);
 
-        $commandOption = array(
+        $commandOptions += array(
             'ConsistentRead'         => $this->consistentRead,
             'TableName'              => $this->getEntityTable($entity),
             'Key'                    => $this->formatKeyCondition($entity),
             'ReturnConsumedCapacity' => $this->returnConsumedCapacity,
         );
 
-        $model = $this->dynamoDb->getItem($commandOption);
+        $model = $this->dynamoDb->getItem($commandOptions);
 
         if (isset($model['Item'])) {
             $this->populateEntity($entity, $model['Item']);
@@ -139,11 +139,11 @@ class DocumentManager implements DocumentManagerInterface
      *
      * @throws \Aws\DynamoDb\Exception\DynamoDBException
      */
-    public function update(EntityInterface $entity)
+    public function update(EntityInterface $entity, array $commandOptions = array())
     {
         $this->dispatchEntityRequestEvent(Events::ENTITY_PRE_UPDATE, $entity);
 
-        $commandOptions = $this->formatPutItemCommandOptions($entity, true);
+        $commandOptions += $this->formatPutItemCommandOptions($entity, true);
         $model = $this->dynamoDb->putItem($commandOptions);
 
         $this->dispatchEntityResponseEvent(Events::ENTITY_POST_UPDATE, $entity, $model);
@@ -157,11 +157,11 @@ class DocumentManager implements DocumentManagerInterface
      *
      * @see http://docs.aws.amazon.com/aws-sdk-php/latest/class-Aws.DynamoDb.DynamoDbClient.html#_deleteItem
      */
-    public function delete(EntityInterface $entity)
+    public function delete(EntityInterface $entity, array $commandOptions = array())
     {
         $this->dispatchEntityRequestEvent(Events::ENTITY_PRE_DELETE, $entity);
 
-        $commandOptions = array(
+        $commandOptions += array(
             'TableName' => $this->getEntityTable($entity),
             'Key'       => $this->formatKeyCondition($entity),
         );
@@ -175,16 +175,16 @@ class DocumentManager implements DocumentManagerInterface
     /**
      * {@inheritDoc}
      */
-    public function deleteByKey($entityClass, $primaryKey)
+    public function deleteByKey($entityClass, $primaryKey, array $commandOptions = array())
     {
         $entity = $this->initEntity($entityClass, $primaryKey);
-        return $this->delete($entity);
+        return $this->delete($entity, $commandOptions);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function exists($entityClass, $primaryKey)
+    public function exists($entityClass, $primaryKey, array $commandOptions = array())
     {
         $entity = $this->initEntity($entityClass, $primaryKey);
 

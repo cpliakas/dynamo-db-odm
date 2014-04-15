@@ -20,48 +20,54 @@ interface DocumentManagerInterface
      * Writes a new entry to DynamoDB containing the entity.
      *
      * @param \Cpliakas\DynamoDb\ODM\EntityInterface $entity
+     * @param array $commandOptions
      *
      * @return bool
      */
-    public function create(EntityInterface $entity);
+    public function create(EntityInterface $entity, array $commandOptions = array());
 
     /**
      * @param string $entityClass
      * @param mixed $primaryKey
+     * @param array $commandOptions
      *
      * @return \Cpliakas\DynamoDb\ODM\EntityInterface|false
      */
-    public function read($entityClass, $primaryKey);
+    public function read($entityClass, $primaryKey, array $commandOptions = array());
 
     /**
      * @param \Cpliakas\DynamoDb\ODM\EntityInterface $entity
+     * @param array $commandOptions
      *
      * @return bool
      */
-    public function update(EntityInterface $entity);
+    public function update(EntityInterface $entity, array $commandOptions = array());
 
     /**
      * @param \Cpliakas\DynamoDb\ODM\EntityInterface $entity
+     * @param array $commandOptions
      *
      * @return bool
      */
-    public function delete(EntityInterface $entity);
+    public function delete(EntityInterface $entity, array $commandOptions = array());
 
     /**
      * @param string $entityClass
      * @param mixed $primaryKey
+     * @param array $commandOptions
      *
      * @return bool
      */
-    public function deleteByKey($entityClass, $primaryKey);
+    public function deleteByKey($entityClass, $primaryKey, array $commandOptions = array());
 
     /**
      * @param string $entityClass
      * @param mixed $primaryKey
+     * @param array $commandOptions
      *
      * @return bool
      */
-    public function exists($entityClass, $primaryKey);
+    public function exists($entityClass, $primaryKey, array $commandOptions = array());
 
     /**
      * Executes a query command.
