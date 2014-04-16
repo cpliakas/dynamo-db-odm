@@ -1,5 +1,7 @@
 # DynamoDB ODM
 
+[![Latest Stable Version](https://poser.pugx.org/cpliakas/dynamo-db-odm/v/stable.png)](https://packagist.org/packages/cpliakas/dynamo-db-odm)
+
 A lightweight, no-frills ODM (Object Document Mapper) for DynamoDB.
 
 ### Why?
