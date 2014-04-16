@@ -20,8 +20,8 @@ class RandomString implements AttributeTransformerInterface
     protected $defaultLength;
 
     /**
-     * @param string $algo
-     * @param int $cost
+     * @param \Symfony\Component\Security\Core\Util\SecureRandomInterface $random
+     * @param int $defaultLength
      */
     public function __construct(SecureRandomInterface $random, $defaultLength = 8)
     {
