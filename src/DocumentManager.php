@@ -56,6 +56,11 @@ class DocumentManager implements DocumentManagerInterface
     protected $tableSuffix;
 
     /**
+     * @var array
+     */
+    protected $entityClasses = array();
+
+    /**
      * @param \Aws\DynamoDb\DynamoDbClient $dynamoDb
      * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
      * @param array $conf
@@ -375,26 +380,31 @@ class DocumentManager implements DocumentManagerInterface
      */
     protected function getEntityClass($entityClass)
     {
-        $found = class_exists($entityClass);
+        if (!isset($this->entityClasses[$entityClass])) {
 
-        if ($found) {
-            $reflection = new \ReflectionClass($entityClass);
-            $fqcn = '\\' . $reflection->getName();
-        } elseif (strpos('\\', $entityClass) !== 0) {
-            foreach ($this->entityNamespaces as $namespace) {
-                $fqcn = '\\' . trim($namespace, '\\') . '\\' . $entityClass;
-                if (class_exists($fqcn)) {
-                    $found = true;
-                    break;
+            $found = class_exists($entityClass);
+
+            if ($found) {
+                $reflection = new \ReflectionClass($entityClass);
+                $fqcn = '\\' . $reflection->getName();
+            } elseif (strpos('\\', $entityClass) !== 0) {
+                foreach ($this->entityNamespaces as $namespace) {
+                    $fqcn = '\\' . trim($namespace, '\\') . '\\' . $entityClass;
+                    if (class_exists($fqcn)) {
+                        $found = true;
+                        break;
+                    }
                 }
             }
+
+            if (!$found) {
+                throw new \DomainException('Entity class not found: ' . $entityClass);
+            }
+
+            $this->entityClasses[$entityClass] = $fqcn;
         }
 
-        if (!$found) {
-            throw new \DomainException('Entity class not found: ' . $entityClass);
-        }
-
-        return $fqcn;
+        return $this->entityClasses[$entityClass];
     }
 
     /**
