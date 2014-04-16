@@ -205,6 +205,8 @@ class Entity extends \ArrayObject implements EntityInterface
      */
     public function offsetSet($index, $value)
     {
+        unset($this->renderCache[$index]);
+
         $eventName = 'dynamo_db.' . $this->classIdentifier . '.' . $index . '.transform';
         $event = new Event\AttributeEvent($this, $index, $value);
         $this->dispatcher->dispatch($eventName, $event);
