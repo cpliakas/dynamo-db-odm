@@ -50,7 +50,7 @@ class Entity extends \ArrayObject implements EntityInterface
      * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
      * @param array $data
      */
-    public function __construct(EventDispatcherInterface $dispatcher, $data = array())
+    public function __construct(EventDispatcherInterface $dispatcher, $data)
     {
         $this->dispatcher = $dispatcher;
         $this->classIdentifier = str_replace('\\', '-', get_class($this));
@@ -60,6 +60,8 @@ class Entity extends \ArrayObject implements EntityInterface
 
     /**
      * {@inheritDoc}
+     *
+     * @deprecated since 0.3.1
      */
     public static function factory(EventDispatcherInterface $dispatcher, $data = array())
     {

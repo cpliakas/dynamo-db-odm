@@ -41,6 +41,11 @@ class DocumentManager implements DocumentManagerInterface
     protected $entityNamespaces;
 
     /**
+     * @var array
+     */
+    protected $entityArguments;
+
+    /**
      * @var string
      */
     protected $tablePrefix;
@@ -64,6 +69,7 @@ class DocumentManager implements DocumentManagerInterface
             'command.consistent_read'          => false,
             'command.return_consumed_capacity' => self::CONSUMED_CAPACITY_NONE,
             'entity.namespaces'                => array(),
+            'entity.arguments'                 => array(),
             'table.prefix'                     => '',
             'table.suffix'                     => '',
         );
@@ -71,6 +77,7 @@ class DocumentManager implements DocumentManagerInterface
         $this->consistentRead         = (bool) $conf['command.consistent_read'];
         $this->returnConsumedCapacity = $conf['command.return_consumed_capacity'];
         $this->entityNamespaces       = $conf['entity.namespaces'];
+        $this->entityArguments        = $conf['entity.arguments'];
         $this->tablePrefix            = $conf['table.prefix'];
         $this->tableSuffix            = $conf['table.suffix'];
     }
@@ -82,11 +89,23 @@ class DocumentManager implements DocumentManagerInterface
      * @return \Cpliakas\DynamoDb\ODM\EntityInterface
      *
      * @throws \DomainException
+     * @throws \UnexpectedValueException
      */
     public function entityFactory($entityClass, $data = array())
     {
         $fqcn = $this->getEntityClass($entityClass);
-        return $fqcn::factory($this->dispatcher, $data);
+        $reflection = new \ReflectionClass($fqcn);
+
+        $arguments = array($this->dispatcher, $data);
+        if (isset($this->entityArguments[$fqcn])) {
+            $arguments = array_merge($arguments, $this->entityArguments[$fqcn]);
+        }
+
+        $document = $reflection->newInstanceArgs($arguments);
+        if (!$document instanceof EntityInterface) {
+            throw new \UnexpectedValueException('Expecting document to be an instance of \Cpliakas\DynamoDb\ODM\EntityInterface');
+        }
+        return $document;
     }
 
     /**
@@ -228,47 +247,6 @@ class DocumentManager implements DocumentManagerInterface
     }
 
     /**
-     * Returns baseline options for putItem commands.
-     *
-     * @param \Cpliakas\DynamoDb\ODM\EntityInterface $entity
-     * @param bool $exists
-     *
-     * @return array
-     *
-     * @throws \Aws\DynamoDb\Exception\DynamoDBException
-     *
-     * @see http://docs.aws.amazon.com/aws-sdk-php/latest/class-Aws.DynamoDb.DynamoDbClient.html#_putItem
-     */
-    protected function formatPutItemCommandOptions(EntityInterface $entity, $mustExist)
-    {
-        $attributes = array($entity::getHashKeyAttribute() => $entity->getHashKey());
-        $rangeKeyAttribute = $entity::getRangeKeyAttribute();
-        if ($rangeKeyAttribute) {
-            $attributes[$rangeKeyAttribute] = $entity->getRangeKey();
-        }
-
-        $commandOptions = array(
-            'TableName'              => $this->getEntityTable($entity),
-            'Item'                   => $this->formatEntityAttributes($entity),
-            'ReturnConsumedCapacity' => $this->returnConsumedCapacity,
-        );
-
-        // Adds conditions based on whether items is being added or updated.
-        if ($entity::enforceEntityIntegrity()) {
-            if ($mustExist) {
-                $entityClass = get_class($entity);
-                $commandOptions['Expected'] = $this->formatAttributes($entityClass, $attributes, Attribute::FORMAT_EXPECTED);
-            } else {
-                foreach ($attributes as $attribute => $value) {
-                    $commandOptions['Expected'][$attribute] = array('Exists' => false);
-                }
-            }
-        }
-
-        return $commandOptions;
-    }
-
-    /**
      * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
      *
      * @return \Cpliakas\DynamoDb\ODM\DocumentManager
@@ -337,6 +315,20 @@ class DocumentManager implements DocumentManagerInterface
     }
 
     /**
+     * Set the additional arguments used to instantiate an entity.
+     *
+     * @param string $entityClass
+     * @param array $arguments
+     *
+     * @return \Cpliakas\DynamoDb\ODM\DocumentManager
+     */
+    public function setEntityArguments($entityClass, array $arguments)
+    {
+        $this->entityArguments[$this->getEntityClass($entityClass)] = $arguments;
+        return $this;
+    }
+
+    /**
      * @param string $prefix
      *
      * @return \Cpliakas\DynamoDb\ODM\DocumentManager
@@ -387,10 +379,10 @@ class DocumentManager implements DocumentManagerInterface
 
         if ($found) {
             $reflection = new \ReflectionClass($entityClass);
-            $fqcn = $reflection->getName();
+            $fqcn = '\\' . $reflection->getName();
         } elseif (strpos('\\', $entityClass) !== 0) {
             foreach ($this->entityNamespaces as $namespace) {
-                $fqcn = rtrim($namespace, '\\') . '\\' . $entityClass;
+                $fqcn = '\\' . trim($namespace, '\\') . '\\' . $entityClass;
                 if (class_exists($fqcn)) {
                     $found = true;
                     break;
@@ -446,6 +438,47 @@ class DocumentManager implements DocumentManagerInterface
         }
 
         return $entity;
+    }
+
+    /**
+     * Returns baseline options for putItem commands.
+     *
+     * @param \Cpliakas\DynamoDb\ODM\EntityInterface $entity
+     * @param bool $exists
+     *
+     * @return array
+     *
+     * @throws \Aws\DynamoDb\Exception\DynamoDBException
+     *
+     * @see http://docs.aws.amazon.com/aws-sdk-php/latest/class-Aws.DynamoDb.DynamoDbClient.html#_putItem
+     */
+    protected function formatPutItemCommandOptions(EntityInterface $entity, $mustExist)
+    {
+        $attributes = array($entity::getHashKeyAttribute() => $entity->getHashKey());
+        $rangeKeyAttribute = $entity::getRangeKeyAttribute();
+        if ($rangeKeyAttribute) {
+            $attributes[$rangeKeyAttribute] = $entity->getRangeKey();
+        }
+
+        $commandOptions = array(
+            'TableName'              => $this->getEntityTable($entity),
+            'Item'                   => $this->formatEntityAttributes($entity),
+            'ReturnConsumedCapacity' => $this->returnConsumedCapacity,
+        );
+
+        // Adds conditions based on whether items is being added or updated.
+        if ($entity::enforceEntityIntegrity()) {
+            if ($mustExist) {
+                $entityClass = get_class($entity);
+                $commandOptions['Expected'] = $this->formatAttributes($entityClass, $attributes, Attribute::FORMAT_EXPECTED);
+            } else {
+                foreach ($attributes as $attribute => $value) {
+                    $commandOptions['Expected'][$attribute] = array('Exists' => false);
+                }
+            }
+        }
+
+        return $commandOptions;
     }
 
     /**

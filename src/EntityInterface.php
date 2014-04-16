@@ -13,6 +13,8 @@ interface EntityInterface
      * @param mixed $data
      *
      * @return \Cpliakas\DynamoDb\ODM\EntityInterface
+     *
+     * @deprecated since 0.3.1
      */
     public static function factory(EventDispatcherInterface $dispatcher, $data = array());
 
