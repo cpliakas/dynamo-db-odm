@@ -88,10 +88,7 @@ class DocumentManager implements DocumentManagerInterface
     }
 
     /**
-     * @param string $entityClass
-     * @param mixed $data
-     *
-     * @return \Cpliakas\DynamoDb\ODM\EntityInterface
+     * {@inheritDoc}
      *
      * @throws \DomainException
      * @throws \UnexpectedValueException

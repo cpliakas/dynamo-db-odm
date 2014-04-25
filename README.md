@@ -221,10 +221,10 @@ Set a `\DateTime` object as the `created` attribute and create the document.
 
 $time = new \DateTime();
 
-$book = $dm->entityFactory('Book', array(
-    'isbn'    => '0-1234-5678-9',
-    'created' => $time,
-));
+$book = $dm->entityFactory('Book')
+    ->setHashKey('0-1234-5678-9')
+    ->setAttribute('created', $time)
+;
 
 $dm->create($book);
 ```

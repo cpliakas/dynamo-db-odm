@@ -7,6 +7,10 @@ interface DocumentManagerInterface
     /**
      * Instantiates an entity class.
      *
+     * The values passed through the $data array bypass transformers. This
+     * parameter is intended to initiaize the raw attribute values when
+     * documents are returned from DynamoDB.
+     *
      * @param string $entityClass
      * @param mixed $data
      *
