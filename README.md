@@ -185,14 +185,14 @@ $result = $dm->scan('Book', $conditions);
 
 ```
 
-### Attribute Renderers
+### Attribute Transformers
 
-Renderers convert the value stored in the database to something that is
-normalized or native to PHP.
+Transformers convert attribute values set through the entity object to something
+else.
 
-The following example builds upon the book entity above to use a renderer that
-converts a Unix timestamp stored in the `created` attribute to a `\DateTime`
-object when it is accessed.
+The following example builds upon the book entity above to use a transformer
+that converts a `\DateTime` object to a Unix timestamp stored in the `created`
+attribute.
 
 ```php
 
@@ -200,6 +200,7 @@ namespace Acme\Entity;
 
 use Cpliakas\DynamoDb\ODM\Entity;
 use Cpliakas\DynamoDb\ODM\Renderer as Renderer;
+use Cpliakas\DynamoDb\ODM\Transformer as Transformer;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class Book extends Entity
@@ -209,21 +210,41 @@ class Book extends Entity
     public function __construct(EventDispatcherInterface $dispatcher, $data = array())
     {
         parent::__construct($dispatcher, $data);
-        $this->addRenderer('created', new Renderer\Date());
+        $this->addTransformer('created', new Transformer\Date());
     }
 }
 
 ```
 
-Set a Unix timestamp as the `created` attribute and create the document.
+Set a `\DateTime` object as the `created` attribute and create the document.
 
 ```php
+
+$time = new \DateTime();
+
 $book = $dm->entityFactory('Book', array(
     'isbn'    => '0-1234-5678-9',
-    'created' => time(),
+    'created' => $time,
 ));
 
 $dm->create($book);
+```
+
+The value is stored as a Unix timestamp in DynamoDB.
+
+### Attribute Renderers
+
+Renderers convert the value stored in the database to something that is
+normalized or native to PHP.
+
+The following example is the opposite of the use case above. It converts the
+Unix timestamp stored in DynamoDB to a `\DateTime` object.
+
+Add the following statement to the `Book` object's constructor like we did with
+the transformer.
+
+```php
+$this->addRenderer('created', new Renderer\Date());
 ```
 
 Read the document from DynamoDB. Accessing the `created` attribute will return
