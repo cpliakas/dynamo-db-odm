@@ -45,6 +45,11 @@ class EncryptedString implements AttributeRendererInterface
             }
         }
 
-        $event->setValue($this->cipher->decrypt($cipherText));
+        $plainText = $this->cipher->decrypt($cipherText);
+        if (false === $plainText) {
+            throw new \UnexpectedValueException('Error decrypting data in the ' . $event->getAttribute() . ' attribute: Invalid key');
+        }
+
+        $event->setValue($plainText);
     }
 }
