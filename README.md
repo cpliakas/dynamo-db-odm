@@ -233,8 +233,8 @@ The value is stored as a Unix timestamp in DynamoDB.
 
 ### Attribute Renderers
 
-Renderers convert the value stored in the DynamoDB to something that is
-normalized or native to PHP when it is accessed.
+Renderers convert the value stored in DynamoDB to something that is normalized
+or native to PHP when it is accessed.
 
 The following example is the opposite of the use case above. It converts the
 Unix timestamp stored in DynamoDB to a `\DateTime` object.
