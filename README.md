@@ -190,9 +190,8 @@ $result = $dm->scan('Book', $conditions);
 Transformers convert attribute values set through the entity object to something
 else.
 
-The following example builds upon the book entity above to use a transformer
-that converts a `\DateTime` object to a Unix timestamp stored in the `created`
-attribute.
+The following example builds upon the book entity above to transform `\DateTime`
+objects set as the `created` attribute to Unix timestamps.
 
 ```php
 
@@ -234,8 +233,8 @@ The value is stored as a Unix timestamp in DynamoDB.
 
 ### Attribute Renderers
 
-Renderers convert the value stored in the database to something that is
-normalized or native to PHP.
+Renderers convert the value stored in the DynamoDB to something that is
+normalized or native to PHP when it is accessed.
 
 The following example is the opposite of the use case above. It converts the
 Unix timestamp stored in DynamoDB to a `\DateTime` object.
