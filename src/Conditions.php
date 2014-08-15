@@ -40,6 +40,34 @@ class Conditions implements ConditionsInterface
     }
 
     /**
+     * Add null condition on a attribute
+     *
+     * @return \Cpliakas\DynamoDb\ODM\Conditions
+     */
+    public function addNullCondition($attribute)
+    {
+        $this->conditions[$attribute] = array(
+            'operator' => ComparisonOperator::NULL,
+        );
+
+        return $this;
+    }
+
+    /**
+     * Add not null condition on a attribute
+     *
+     * @return \Cpliakas\DynamoDb\ODM\Conditions
+     */
+    public function addNotNullCondition($attribute)
+    {
+        $this->conditions[$attribute] = array(
+            'operator' => ComparisonOperator::NOT_NULL,
+        );
+
+        return $this;
+    }
+
+    /**
      * {@inheritDoc}
      *
      * @return \Cpliakas\DynamoDb\ODM\Conditions

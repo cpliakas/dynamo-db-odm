@@ -567,9 +567,11 @@ class DocumentManager implements DocumentManagerInterface
         $rendered = array();
         foreach ($conditions->getConditions() as $attribute => $condition) {
             $rendered[$attribute] = array(
-                'AttributeValueList' => $this->formatAttributes($entityClass, $condition['values']),
                 'ComparisonOperator' => $condition['operator'],
             );
+            if (isset($condition['values'])) {
+                $rendered[$attribute]['AttributeValueList'] = $this->formatAttributes($entityClass, $condition['values']);
+            }
         }
         return $rendered;
     }

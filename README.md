@@ -182,6 +182,11 @@ $conditions = Conditions::factory()
     ->addCondition('copyright', 2010, ComparisonOperator::GT)
 ;
 
+// Search for books with existing attribute 'extra'
+$conditions = Conditions::factory()
+    ->addNotNullCondition('extra')
+;
+
 $result = $dm->scan('Book', $conditions);
 
 ```
