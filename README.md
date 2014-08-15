@@ -185,6 +185,7 @@ $conditions = Conditions::factory()
 // Search for books with existing attribute 'extra'
 $conditions = Conditions::factory()
     ->addNotNullCondition('extra')
+;
 
 $result = $dm->scan('Book', $conditions);
 
