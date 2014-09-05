@@ -5,6 +5,10 @@ namespace Cpliakas\DynamoDb\ODM;
 use Aws\Common\Iterator\AwsResourceIterator;
 use Aws\DynamoDb\DynamoDbClient;
 use Aws\DynamoDb\Model\Attribute;
+use Aws\DynamoDb\Model\Item;
+use Aws\DynamoDb\Model\BatchRequest\WriteRequestBatch;
+use Aws\DynamoDb\Model\BatchRequest\PutRequest;
+use Aws\DynamoDb\Model\BatchRequest\DeleteRequest;
 use Guzzle\Service\Resource\Model;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -54,6 +58,16 @@ class DocumentManager implements DocumentManagerInterface
      * @var string
      */
     protected $tableSuffix;
+
+    /**
+     * @var \Guzzle\Batch\FlushingBatch
+     */
+    protected $putBatch = null;
+
+    /**
+     * @var \Guzzle\Batch\FlushingBatch
+     */
+    protected $deleteBatch = null;
 
     /**
      * @var array
@@ -246,6 +260,48 @@ class DocumentManager implements DocumentManagerInterface
     public function scan($entityClass, $commandOptions)
     {
         return $this->executeSearchCommand($entityClass, $commandOptions, 'Scan', 'ScanFilter');
+    }
+
+    /**
+     * Add entity to the batch creation
+     * @param  EntityInterface $entity
+     * @throws \Aws\DynamoDb\Exception\DynamoDBException
+     */
+    public function createBatch(EntityInterface $entity)
+    {
+        if (is_null($this->putBatch)) {
+            $this->putBatch = WriteRequestBatch::factory($this->dynamoDb);
+        }
+        $this->putBatch->add(new PutRequest(Item::fromArray($entity->getArrayCopy()), $this->getEntityTable($entity)));
+    }
+
+    /**
+     * Add entity to the batch deletion
+     * @param  EntityInterface $entity
+     * @throws \Aws\DynamoDb\Exception\DynamoDBException
+     */
+    public function deleteBatch(EntityInterface $entity)
+    {
+        if (is_null($this->deleteBatch)) {
+            $this->deleteBatch = WriteRequestBatch::factory($this->dynamoDb);
+        }
+        $this->deleteBatch->add(new DeleteRequest($this->formatKeyCondition($entity), $this->getEntityTable($entity)));
+    }
+
+    /**
+     * Flush creation and/or deletion batch
+     * @return [type] [description]
+     */
+    public function flush()
+    {
+        if (!is_null($this->putBatch)) {
+            $this->putBatch->flush();
+            $this->putBatch = null;
+        }
+        if (!is_null($this->deleteBatch)) {
+            $this->deleteBatch->flush();
+            $this->deleteBatch = null;
+        }
     }
 
     /**

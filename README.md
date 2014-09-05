@@ -131,6 +131,12 @@ $book['copyright'] = 2014;
 
 // Save the document
 $dm->create($book);
+
+// Bulk insert
+foreach($books as $book) {
+    $dm->createBatch($book);
+}
+$dm->flush();
 ```
 
 Read, update, and delete the document.
@@ -147,6 +153,12 @@ $dm->update($book);
 // Delete the document
 $dm->delete($book);
 
+
+// Bulk delete
+foreach($books as $book) {
+    $dm->deleteBatch($book);
+}
+$dm->flush();
 ```
 
 *NOTE:* Other ODMs use the [unit of work pattern](http://robrich.org/archive/2012/04/18/design-patterns-for-data-persistence-unit-of-work-pattern-and.aspx)
