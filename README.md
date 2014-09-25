@@ -1,5 +1,6 @@
 # DynamoDB ODM
 
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/cpliakas/dynamo-db-odm/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/cpliakas/dynamo-db-odm/?branch=master)
 [![Latest Stable Version](https://poser.pugx.org/cpliakas/dynamo-db-odm/v/stable.png)](https://packagist.org/packages/cpliakas/dynamo-db-odm)
 [![License](https://poser.pugx.org/cpliakas/dynamo-db-odm/license.svg)](https://packagist.org/packages/cpliakas/dynamo-db-odm)
 
