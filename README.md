@@ -76,7 +76,7 @@ class Book extends Entity
 
     public function getIsbn()
     {
-        return $this->setAttribute('isbn');
+        return $this->getAttribute('isbn');
     }
 }
 ```
