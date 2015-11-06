@@ -6,6 +6,8 @@
 
 A lightweight, no-frills ODM (Object Document Mapper) for [DynamoDB](http://aws.amazon.com/dynamodb/).
 
+*NOTE:* THis library only worjks with the 2.x version of the AWS SDK. The refactorings that went into the 3.x version make the SDK much easier to work with, and this library provides less value than before (which is generally a good thing!). It is unclear as to whether or not a port to the 3.x SDK will be useful.
+
 ### Why?
 
 Amazon provides an SDK that connects to DynamoDB. Why would you want to use an
